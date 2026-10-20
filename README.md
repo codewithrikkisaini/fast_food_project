@@ -101,7 +101,7 @@
 
 ---
 
-## 🏗️ System Architecture
+<!-- ## 🏗️ System Architecture
 
 ```mermaid
 graph TD
@@ -127,7 +127,7 @@ graph TD
         FrontendCtrl --> FrontendViews[Blade Views: resources/views/frontend/]
         AdminCtrl --> AdminViews[Blade Views: resources/views/admin/]
     end
-```
+``` -->
 
 ---
 
