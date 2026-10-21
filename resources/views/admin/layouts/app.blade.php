@@ -197,6 +197,50 @@
             font-size: 1rem;
         }
 
+        .sidebar-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            line-height: 1.4;
+        }
+
+        .sidebar-badge-gray {
+            background: rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .sidebar-badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .sidebar-badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .sidebar-badge-primary {
+            background: rgba(232, 40, 26, 0.2);
+            color: #ff6b35;
+            border: 1px solid rgba(232, 40, 26, 0.35);
+        }
+
+        .nav-link-admin.active .sidebar-badge {
+            background: #ffffff !important;
+            color: #ea381e !important;
+            border: none !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        }
+
         .sidebar-footer {
             padding: 18px 20px;
             border-top: 1px solid rgba(51, 65, 85, 0.6);
@@ -551,9 +595,20 @@
             </div>
         </div>
 
+        @php
+            $sidebarStats = app(\App\Services\RestaurantDataService::class)->getStats();
+        @endphp
         <!-- MENU ITEMS -->
         <div class="sidebar-menu">
-            <!-- HOME (ONLY VISIBLE MENU ITEM AS REQUESTED) -->
+            <!-- DASHBOARD -->
+            <div class="nav-item-admin">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="nav-link-admin {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <div class="nav-lead"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></div>
+                </a>
+            </div>
+
+            <!-- HOME -->
             <div class="nav-item-admin">
                 <a href="{{ route('admin.home') }}"
                     class="nav-link-admin {{ request()->routeIs('admin.home*') ? 'active' : '' }}">
@@ -580,6 +635,7 @@
                         <i class="fas fa-hamburger"></i>
                         <span>Menu</span>
                     </div>
+                    <span class="sidebar-badge sidebar-badge-gray">{{ $sidebarStats['total_menu_items'] ?? 0 }}</span>
                 </a>
             </div>
 
@@ -591,6 +647,7 @@
                         <i class="fas fa-user-tie"></i>
                         <span>Chefs</span>
                     </div>
+                    <span class="sidebar-badge sidebar-badge-gray">{{ $sidebarStats['total_chefs'] ?? 0 }}</span>
                 </a>
             </div>
 
@@ -608,16 +665,47 @@
             <!-- OPERATIONS & INQUIRIES -->
             <div class="sidebar-heading">OPERATIONS &amp; INQUIRIES</div>
 
-            <!-- 5. RESERVATION -->
-            <!-- <div class="nav-item-admin">
+            <!-- 5. RESERVATIONS -->
+            <div class="nav-item-admin">
                 <a href="{{ route('admin.reservations') }}"
                     class="nav-link-admin {{ request()->routeIs('admin.reservations*') ? 'active' : '' }}">
                     <div class="nav-lead">
                         <i class="fas fa-calendar-check"></i>
-                        <span>Reservation</span>
+                        <span>Reservations</span>
                     </div>
+                    <span class="sidebar-badge {{ ($sidebarStats['pending_reservations'] ?? 0) > 0 ? 'sidebar-badge-warning' : 'sidebar-badge-gray' }}" title="{{ ($sidebarStats['pending_reservations'] ?? 0) }} Pending">
+                        {{ $sidebarStats['total_reservations'] ?? 0 }}
+                    </span>
                 </a>
-            </div> -->
+            </div>
+
+            <!-- 6. REVIEWS -->
+            <div class="nav-item-admin">
+                <a href="{{ route('admin.reviews') }}"
+                    class="nav-link-admin {{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
+                    <div class="nav-lead">
+                        <i class="fas fa-star"></i>
+                        <span>Reviews</span>
+                    </div>
+                    <span class="sidebar-badge sidebar-badge-primary">
+                        {{ $sidebarStats['total_reviews'] ?? 0 }}
+                    </span>
+                </a>
+            </div>
+
+            <!-- 7. CONTACT INQUIRIES -->
+            <div class="nav-item-admin">
+                <a href="{{ route('admin.contact') }}"
+                    class="nav-link-admin {{ request()->routeIs('admin.contact*') ? 'active' : '' }}">
+                    <div class="nav-lead">
+                        <i class="fas fa-envelope"></i>
+                        <span>Contact Msgs</span>
+                    </div>
+                    <span class="sidebar-badge {{ ($sidebarStats['unread_contacts'] ?? 0) > 0 ? 'sidebar-badge-danger' : 'sidebar-badge-gray' }}" title="{{ ($sidebarStats['unread_contacts'] ?? 0) }} Unread">
+                        {{ $sidebarStats['total_contacts'] ?? 0 }}
+                    </span>
+                </a>
+            </div>
         </div>
 
         <!-- SIDEBAR FOOTER -->

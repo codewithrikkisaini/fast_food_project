@@ -17,7 +17,7 @@
    </div>
 
    <!-- RESERVATION SECTION -->
-   <section id="reservation" style="padding: 85px 0;">
+   <section id="reservation" style="padding: 80px 0 110px; background: #fafbfc;">
       <div class="container">
          <div class="row g-4 align-items-start">
             <div class="col-lg-4" data-aos="fade-right">

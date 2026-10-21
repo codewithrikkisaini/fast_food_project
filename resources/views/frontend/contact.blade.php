@@ -17,7 +17,7 @@
    </div>
 
    <!-- CONTACT SECTION -->
-   <section id="contact-section" style="padding: 85px 0;">
+   <section id="contact-section" style="padding: 80px 0 110px; background: #fafbfc;">
       <div class="container">
          <div class="row g-4">
             <div class="col-lg-4" data-aos="fade-right">

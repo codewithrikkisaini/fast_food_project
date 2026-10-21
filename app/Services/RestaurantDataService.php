@@ -2,6 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Contact;
+use App\Models\Reservation;
+use App\Models\Review;
+use Illuminate\Support\Facades\Schema;
+
 class RestaurantDataService
 {
     protected string $filePath;
@@ -308,26 +313,41 @@ class RestaurantDataService
     // ----------------------------------------------------
     // RESERVATIONS
     // ----------------------------------------------------
+    // RESERVATIONS (Database & JSON Sync)
+    // ----------------------------------------------------
     public function getReservations(): array
     {
+        try {
+            if (Schema::hasTable('reservations')) {
+                if (Reservation::count() === 0) {
+                    $data = $this->getAllData();
+                    foreach (array_reverse($data['reservations'] ?? []) as $r) {
+                        Reservation::create([
+                            'name' => $r['name'] ?? '',
+                            'phone' => $r['phone'] ?? '',
+                            'email' => $r['email'] ?? '',
+                            'guests' => $r['guests'] ?? '2 People',
+                            'date' => $r['date'] ?? date('Y-m-d'),
+                            'time' => $r['time'] ?? '07:00 PM',
+                            'special_requests' => $r['special_requests'] ?? null,
+                            'status' => $r['status'] ?? 'Pending',
+                        ]);
+                    }
+                }
+                $dbItems = Reservation::orderBy('id', 'desc')->get()->toArray();
+                if (!empty($dbItems)) {
+                    return $dbItems;
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         return $data['reservations'] ?? [];
     }
 
     public function addReservation(array $resData): array
     {
-        $data = $this->getAllData();
-        $reservations = $data['reservations'] ?? [];
-
-        $maxId = 0;
-        foreach ($reservations as $r) {
-            if ((int)($r['id'] ?? 0) > $maxId) {
-                $maxId = (int)$r['id'];
-            }
-        }
-
         $newReservation = [
-            'id' => $maxId + 1,
             'name' => $resData['name'] ?? '',
             'phone' => $resData['phone'] ?? '',
             'email' => $resData['email'] ?? '',
@@ -335,9 +355,30 @@ class RestaurantDataService
             'date' => $resData['date'] ?? date('Y-m-d'),
             'time' => $resData['time'] ?? '07:00 PM',
             'special_requests' => $resData['special_requests'] ?? ($resData['message'] ?? 'No special requests'),
-            'status' => 'Pending', // Pending, Confirmed, Cancelled
+            'status' => 'Pending',
             'created_at' => date('Y-m-d H:i:s')
         ];
+
+        // 1. Save directly into Database table
+        try {
+            if (Schema::hasTable('reservations')) {
+                $created = Reservation::create($newReservation);
+                $newReservation['id'] = $created->id;
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Synchronize with JSON store
+        $data = $this->getAllData();
+        $reservations = $data['reservations'] ?? [];
+        if (empty($newReservation['id'])) {
+            $maxId = 0;
+            foreach ($reservations as $r) {
+                if ((int)($r['id'] ?? 0) > $maxId) {
+                    $maxId = (int)$r['id'];
+                }
+            }
+            $newReservation['id'] = $maxId + 1;
+        }
 
         array_unshift($reservations, $newReservation);
         $data['reservations'] = $reservations;
@@ -348,6 +389,15 @@ class RestaurantDataService
 
     public function updateReservationStatus(int $id, string $status): bool
     {
+        try {
+            if (Schema::hasTable('reservations')) {
+                $item = Reservation::find($id);
+                if ($item) {
+                    $item->update(['status' => $status]);
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $reservations = $data['reservations'] ?? [];
 
@@ -364,6 +414,12 @@ class RestaurantDataService
 
     public function deleteReservation(int $id): bool
     {
+        try {
+            if (Schema::hasTable('reservations')) {
+                Reservation::where('id', $id)->delete();
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $reservations = $data['reservations'] ?? [];
         $filtered = array_filter($reservations, fn($r) => (int)$r['id'] !== $id);
@@ -374,36 +430,68 @@ class RestaurantDataService
     }
 
     // ----------------------------------------------------
-    // REVIEWS
+    // REVIEWS (Database & JSON Sync)
     // ----------------------------------------------------
     public function getReviews(): array
     {
+        try {
+            if (Schema::hasTable('reviews')) {
+                if (Review::count() === 0) {
+                    $data = $this->getAllData();
+                    foreach (array_reverse($data['reviews'] ?? []) as $rv) {
+                        Review::create([
+                            'name' => $rv['name'] ?? 'Guest Customer',
+                            'role' => $rv['role'] ?? 'Verified Diner',
+                            'rating' => (int)($rv['rating'] ?? 5),
+                            'text' => $rv['text'] ?? '',
+                            'image' => $rv['image'] ?? 'img/testimonial/1.jpg',
+                            'status' => $rv['status'] ?? 'Approved',
+                        ]);
+                    }
+                }
+                $dbItems = Review::orderBy('id', 'desc')->get()->toArray();
+                if (!empty($dbItems)) {
+                    return $dbItems;
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         return $data['reviews'] ?? [];
     }
 
     public function addReview(array $revData): array
     {
-        $data = $this->getAllData();
-        $reviews = $data['reviews'] ?? [];
-
-        $maxId = 0;
-        foreach ($reviews as $r) {
-            if ((int)($r['id'] ?? 0) > $maxId) {
-                $maxId = (int)$r['id'];
-            }
-        }
-
         $newReview = [
-            'id' => $maxId + 1,
             'name' => $revData['name'] ?? 'Guest Customer',
             'role' => $revData['role'] ?? 'Verified Diner',
             'rating' => (int)($revData['rating'] ?? 5),
             'text' => $revData['text'] ?? ($revData['message'] ?? 'Delicious food and excellent service!'),
-            'image' => 'img/testimonial/' . (rand(1, 4)) . '.jpg',
-            'status' => 'Approved', // Approved, Pending
+            'image' => $revData['image'] ?? ('img/testimonial/' . (rand(1, 4)) . '.jpg'),
+            'status' => $revData['status'] ?? 'Approved',
             'created_at' => date('Y-m-d H:i:s')
         ];
+
+        // 1. Save directly into Database table
+        try {
+            if (Schema::hasTable('reviews')) {
+                $created = Review::create($newReview);
+                $newReview['id'] = $created->id;
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Synchronize with JSON store
+        $data = $this->getAllData();
+        $reviews = $data['reviews'] ?? [];
+        if (empty($newReview['id'])) {
+            $maxId = 0;
+            foreach ($reviews as $r) {
+                if ((int)($r['id'] ?? 0) > $maxId) {
+                    $maxId = (int)$r['id'];
+                }
+            }
+            $newReview['id'] = $maxId + 1;
+        }
 
         array_unshift($reviews, $newReview);
         $data['reviews'] = $reviews;
@@ -414,6 +502,15 @@ class RestaurantDataService
 
     public function updateReviewStatus(int $id, string $status): bool
     {
+        try {
+            if (Schema::hasTable('reviews')) {
+                $item = Review::find($id);
+                if ($item) {
+                    $item->update(['status' => $status]);
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $reviews = $data['reviews'] ?? [];
 
@@ -430,6 +527,12 @@ class RestaurantDataService
 
     public function deleteReview(int $id): bool
     {
+        try {
+            if (Schema::hasTable('reviews')) {
+                Review::where('id', $id)->delete();
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $reviews = $data['reviews'] ?? [];
         $filtered = array_filter($reviews, fn($r) => (int)$r['id'] !== $id);
@@ -440,28 +543,39 @@ class RestaurantDataService
     }
 
     // ----------------------------------------------------
-    // CONTACT INQUIRIES
+    // CONTACT INQUIRIES (Database & JSON Sync)
     // ----------------------------------------------------
     public function getContacts(): array
     {
+        try {
+            if (Schema::hasTable('contacts')) {
+                if (Contact::count() === 0) {
+                    $data = $this->getAllData();
+                    foreach (array_reverse($data['contacts'] ?? []) as $c) {
+                        Contact::create([
+                            'name' => $c['name'] ?? '',
+                            'email' => $c['email'] ?? '',
+                            'phone' => $c['phone'] ?? '',
+                            'subject' => $c['subject'] ?? 'General Inquiry',
+                            'message' => $c['message'] ?? '',
+                            'is_read' => !empty($c['is_read']),
+                        ]);
+                    }
+                }
+                $dbItems = Contact::orderBy('id', 'desc')->get()->toArray();
+                if (!empty($dbItems)) {
+                    return $dbItems;
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         return $data['contacts'] ?? [];
     }
 
     public function addContact(array $contactData): array
     {
-        $data = $this->getAllData();
-        $contacts = $data['contacts'] ?? [];
-
-        $maxId = 0;
-        foreach ($contacts as $c) {
-            if ((int)($c['id'] ?? 0) > $maxId) {
-                $maxId = (int)$c['id'];
-            }
-        }
-
         $newContact = [
-            'id' => $maxId + 1,
             'name' => $contactData['name'] ?? '',
             'email' => $contactData['email'] ?? '',
             'phone' => $contactData['phone'] ?? '',
@@ -470,6 +584,27 @@ class RestaurantDataService
             'is_read' => false,
             'created_at' => date('Y-m-d H:i:s')
         ];
+
+        // 1. Save directly into Database table
+        try {
+            if (Schema::hasTable('contacts')) {
+                $created = Contact::create($newContact);
+                $newContact['id'] = $created->id;
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Synchronize with JSON store
+        $data = $this->getAllData();
+        $contacts = $data['contacts'] ?? [];
+        if (empty($newContact['id'])) {
+            $maxId = 0;
+            foreach ($contacts as $c) {
+                if ((int)($c['id'] ?? 0) > $maxId) {
+                    $maxId = (int)$c['id'];
+                }
+            }
+            $newContact['id'] = $maxId + 1;
+        }
 
         array_unshift($contacts, $newContact);
         $data['contacts'] = $contacts;
@@ -480,6 +615,15 @@ class RestaurantDataService
 
     public function markContactRead(int $id): bool
     {
+        try {
+            if (Schema::hasTable('contacts')) {
+                $item = Contact::find($id);
+                if ($item) {
+                    $item->update(['is_read' => true]);
+                }
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $contacts = $data['contacts'] ?? [];
 
@@ -496,6 +640,12 @@ class RestaurantDataService
 
     public function deleteContact(int $id): bool
     {
+        try {
+            if (Schema::hasTable('contacts')) {
+                Contact::where('id', $id)->delete();
+            }
+        } catch (\Throwable $e) {}
+
         $data = $this->getAllData();
         $contacts = $data['contacts'] ?? [];
         $filtered = array_filter($contacts, fn($c) => (int)$c['id'] !== $id);

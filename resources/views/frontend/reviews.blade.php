@@ -2,6 +2,46 @@
 
 @section('title', 'Customer Reviews - ' . config('app.name', 'Fast Food'))
 
+@push('styles')
+<style>
+   .review-submit-card {
+      position: relative !important;
+      display: block !important;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 42px 48px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.07);
+      border: 1px solid #f0f3f6;
+      margin-top: 20px;
+      margin-bottom: 30px;
+   }
+   @media (max-width: 768px) {
+      .review-submit-card {
+         padding: 28px 22px;
+      }
+   }
+   .review-star-picker {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #fdfaf6;
+      border: 1.5px solid #f7dfc5;
+      border-radius: 12px;
+   }
+   .review-star-picker i {
+      font-size: 1.4rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+   }
+   .review-star-picker i.active {
+      color: #f59e0b;
+      transform: scale(1.1);
+   }
+</style>
+@endpush
+
 @section('content')
    <!-- PAGE BANNER -->
    <div class="page-banner">
@@ -17,7 +57,7 @@
    </div>
 
    <!-- REVIEWS OVERVIEW & LIST -->
-   <section style="padding: 85px 0;">
+   <section style="padding: 75px 0 110px; background: #fafbfc;">
       <div class="container">
          <!-- STATS ROW -->
          <div class="row g-4 mb-5 align-items-center">
@@ -29,7 +69,7 @@
                <h6 class="mb-0 text-muted">Overall Diner Rating (850+ Reviews)</h6>
             </div>
             <div class="col-lg-8">
-               <div class="p-4 bg-white rounded-4 shadow-sm">
+               <div class="p-4 bg-white rounded-4 shadow-sm border border-light">
                   <div class="d-flex align-items-center justify-content-between mb-2">
                      <span class="fw-semibold">Food Quality &amp; Freshness</span>
                      <span class="text-muted">98% Satisfied</span>
@@ -83,13 +123,14 @@
 
          <!-- SUBMIT REVIEW FORM -->
          <div class="row justify-content-center">
-            <div class="col-lg-8">
-               <div class="fcard shadow-sm p-4 p-md-5">
+            <div class="col-lg-9 col-xl-8">
+               <div class="review-submit-card">
                   <div class="text-center mb-4">
-                     <span class="slbl">Your Voice Matters</span>
-                     <h3 style="font-size:1.8rem;font-weight:700;">Leave Us a Review</h3>
-                     <p class="text-muted" style="font-size:0.9rem;">Share your experience with our dishes and team</p>
+                     <span class="slbl"><i class="fas fa-comment-alt me-1"></i>Your Voice Matters</span>
+                     <h3 style="font-size:1.85rem;font-weight:800;color:#1e293b;margin-top:4px;">Leave Us a Review</h3>
+                     <p class="text-muted" style="font-size:0.92rem;max-width:520px;margin:0 auto;">Share your personal experience with our dishes and team. Your feedback helps us serve you better!</p>
                   </div>
+
                   <form action="{{ route('reviews.store') }}" method="POST">
                      @csrf
                      <div class="row g-3">
@@ -103,20 +144,22 @@
                         </div>
                         <div class="col-12">
                            <label class="flbl">Rating (1 to 5 Stars) *</label>
-                           <select name="rating" class="fctrl" required>
-                              <option value="5" selected>5 Stars - Outstanding, loved it!</option>
-                              <option value="4">4 Stars - Great experience</option>
-                              <option value="3">3 Stars - Average</option>
-                              <option value="2">2 Stars - Needs improvement</option>
-                              <option value="1">1 Star - Disappointed</option>
+                           <select name="rating" id="reviewRatingSelect" class="fctrl" required>
+                              <option value="5" selected>⭐⭐⭐⭐⭐ 5 Stars - Outstanding, loved it!</option>
+                              <option value="4">⭐⭐⭐⭐ 4 Stars - Great experience</option>
+                              <option value="3">⭐⭐⭐ 3 Stars - Average</option>
+                              <option value="2">⭐⭐ 2 Stars - Needs improvement</option>
+                              <option value="1">⭐ 1 Star - Disappointed</option>
                            </select>
                         </div>
                         <div class="col-12">
                            <label class="flbl">Your Review &amp; Comments *</label>
                            <textarea name="message" class="fctrl" rows="4" placeholder="Tell us about the dishes you tried, the taste, and our service..." required>{{ old('message') }}</textarea>
                         </div>
-                        <div class="col-12 text-center">
-                           <button type="submit" class="btn-red px-5"><i class="fas fa-star me-1"></i>Submit Review</button>
+                        <div class="col-12 text-center pt-2">
+                           <button type="submit" class="btn-red px-5 py-3 shadow" style="font-size:1rem;border-radius:12px;">
+                              <i class="fas fa-paper-plane me-2"></i>Submit Review
+                           </button>
                         </div>
                      </div>
                   </form>
