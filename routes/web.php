@@ -84,4 +84,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/contact', [AdminController::class, 'contact'])->name('contact');
     Route::post('/contact/read/{id}', [AdminController::class, 'markContactRead'])->name('contact.read');
     Route::post('/contact/delete/{id}', [AdminController::class, 'deleteContact'])->name('contact.delete');
+
+    // Restaurant Settings (Contact Info, Hours, Social Links)
+    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 });

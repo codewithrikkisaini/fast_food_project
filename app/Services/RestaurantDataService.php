@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Contact;
 use App\Models\Reservation;
 use App\Models\Review;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Schema;
 
 class RestaurantDataService
@@ -91,6 +92,79 @@ class RestaurantDataService
     {
         $data = $this->getAllData();
         $data['about'] = array_merge($data['about'] ?? [], $settings);
+        $this->saveAllData($data);
+    }
+
+    protected ?array $cachedSiteSettings = null;
+
+    // ----------------------------------------------------
+    // GENERAL SITE SETTINGS (Address, Phone, Email, Hours, Social Links)
+    // ----------------------------------------------------
+    public function getSiteSettings(): array
+    {
+        if ($this->cachedSiteSettings !== null) {
+            return $this->cachedSiteSettings;
+        }
+
+        $defaults = [
+            'restaurant_name' => 'Fast Food',
+            'phone' => '+1 (800) 123-4567',
+            'email' => 'hello@fastfood.com',
+            'address' => '42 Flavor Street, Manhattan, NY 10001',
+            'hours' => 'Wed - Sun: 09 AM - 11 PM',
+            'announcement' => 'Free Delivery Today on Orders Over $25!',
+            'facebook' => 'https://facebook.com',
+            'instagram' => 'https://instagram.com',
+            'twitter' => 'https://twitter.com',
+            'youtube' => 'https://youtube.com',
+            'tiktok' => 'https://tiktok.com',
+            'footer_desc' => "We bring the world's finest flavors together in a fast, friendly, and affordable experience. Every meal crafted with love."
+        ];
+
+        // 1. Try from database table
+        try {
+            if (Schema::hasTable('site_settings')) {
+                $dbSetting = SiteSetting::first();
+                if (!$dbSetting) {
+                    $dbSetting = SiteSetting::create($defaults);
+                }
+                if ($dbSetting) {
+                    $this->cachedSiteSettings = array_merge($defaults, array_filter($dbSetting->toArray(), fn($v) => !is_null($v)));
+                    return $this->cachedSiteSettings;
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Fallback to JSON store
+        $data = $this->getAllData();
+        $stored = $data['settings'] ?? [];
+        $this->cachedSiteSettings = array_merge($defaults, $stored);
+        return $this->cachedSiteSettings;
+    }
+
+    public function updateSiteSettings(array $settings): void
+    {
+        $this->cachedSiteSettings = null;
+
+        // 1. Save to Database
+        try {
+            if (Schema::hasTable('site_settings')) {
+                $dbSetting = SiteSetting::first();
+                if ($dbSetting) {
+                    $dbSetting->update($settings);
+                } else {
+                    SiteSetting::create($settings);
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // 2. Save to JSON store
+        $data = $this->getAllData();
+        $data['settings'] = array_merge($data['settings'] ?? [], $settings);
+        if (isset($settings['phone'])) $data['home']['phone'] = $settings['phone'];
+        if (isset($settings['email'])) $data['home']['email'] = $settings['email'];
+        if (isset($settings['address'])) $data['home']['address'] = $settings['address'];
+        if (isset($settings['announcement'])) $data['home']['announcement'] = $settings['announcement'];
         $this->saveAllData($data);
     }
 
