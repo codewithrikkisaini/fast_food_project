@@ -14,7 +14,7 @@
          <div class="row align-items-center g-5" style="min-height:88vh;">
             <div class="col-lg-6">
                <div class="hbadge">
-                  <div class="hbi"><i class="fas fa-star"></i></div>
+                  <div class="hbi"><i class="{{ $homeSettings['hero_badge_icon'] ?? 'fas fa-star' }}"></i></div>
                   <span>{{ $homeSettings['hero_badge'] ?? '#1 Rated Fast Food in New York' }}</span>
                </div>
                <h1 class="htitle">
@@ -35,44 +35,65 @@
                   {{ $homeSettings['hero_desc'] ?? 'Experience bold flavors crafted from premium ingredients. From crispy smashed burgers to gourmet pizzas - every bite is an adventure worth savoring.' }}
                </p>
                <div class="d-flex flex-wrap gap-3 mb-2">
-                  <a href="{{ route('menu') }}" class="btn-red"><i class="fas fa-utensils"></i>Explore Menu</a>
-                  <a href="https://www.youtube.com/watch?v=RXv_uIN6e-Y" class="magnific_popup btn-play popup-youtube">
+                  <a href="{{ !empty($homeSettings['hero_btn1_url']) ? $homeSettings['hero_btn1_url'] : route('menu') }}" class="btn-red">
+                     <i class="fas fa-utensils"></i>{{ $homeSettings['hero_btn1_text'] ?? 'Explore Menu' }}
+                  </a>
+                  <a href="{{ $homeSettings['hero_btn2_url'] ?? 'https://www.youtube.com/watch?v=RXv_uIN6e-Y' }}" class="magnific_popup btn-play popup-youtube">
                      <div class="pico"><i class="fas fa-play"></i></div>
-                     <span>Watch Our Story</span>
+                     <span>{{ $homeSettings['hero_btn2_text'] ?? 'Watch Our Story' }}</span>
                   </a>
                </div>
                <div class="hstats d-flex gap-3 flex-wrap mt-4">
-                  <div class="hstat"><span class="snum">{{ $homeSettings['happy_customers'] ?? '850+' }}</span><small>Happy
-                        Customers</small></div>
+                  <div class="hstat">
+                     <span class="snum">{{ $homeSettings['happy_customers'] ?? '850+' }}</span>
+                     <small>{{ $homeSettings['happy_customers_label'] ?? 'Happy Customers' }}</small>
+                  </div>
                   <div class="sdiv"></div>
-                  <div class="hstat"><span class="snum">{{ $homeSettings['menu_count'] ?? '120+' }}</span><small>Menu
-                        Items</small></div>
+                  <div class="hstat">
+                     <span class="snum">{{ $homeSettings['menu_count'] ?? '120+' }}</span>
+                     <small>{{ $homeSettings['menu_count_label'] ?? 'Menu Items' }}</small>
+                  </div>
                   <div class="sdiv"></div>
-                  <div class="hstat"><span class="snum">{{ $homeSettings['chefs_count'] ?? '15+' }}</span><small>Expert
-                        Chefs</small></div>
+                  <div class="hstat">
+                     <span class="snum">{{ $homeSettings['chefs_count'] ?? '15+' }}</span>
+                     <small>{{ $homeSettings['chefs_count_label'] ?? 'Expert Chefs' }}</small>
+                  </div>
                   <div class="sdiv"></div>
-                  <div class="hstat"><span
-                        class="snum">{{ $homeSettings['experience_years'] ?? '12yr' }}</span><small>Experience</small>
+                  <div class="hstat">
+                     <span class="snum">{{ $homeSettings['experience_years'] ?? '12yr' }}</span>
+                     <small>{{ $homeSettings['experience_years_label'] ?? 'Experience' }}</small>
                   </div>
                </div>
             </div>
             <div class="col-lg-6">
-               <div style="position:relative;text-align:center;">
+               <div class="hero-image-wrap">
                   <div class="hcircle">
                      <img src="{{ asset($homeSettings['hero_image'] ?? 'img/banner-img.jpg') }}"
                         alt="{{ $homeSettings['hero_title'] ?? 'Fast Food' }}" />
                   </div>
-                  <div class="fcard fc1">
-                     <div class="fcoi r"><i class="fas fa-fire"></i></div>
-                     <div><span class="fcnum">Hot Deal</span><span class="fcsm">30% off today</span></div>
+                  <!-- Floating Card 1 (Top Left: Hot Deal) -->
+                  <div class="hero-float-card hfc-1">
+                     <div class="hfc-icon red"><i class="{{ $homeSettings['card1_icon'] ?? 'fas fa-fire' }}"></i></div>
+                     <div class="hfc-content">
+                        <span class="hfc-title">{{ $homeSettings['card1_title'] ?? 'Hot Deal' }}</span>
+                        <span class="hfc-subtitle">{{ $homeSettings['card1_subtitle'] ?? '30% off today' }}</span>
+                     </div>
                   </div>
-                  <div class="fcard fc2">
-                     <div class="fcoi y"><i class="fas fa-star"></i></div>
-                     <div><span class="fcnum">4.9/5</span><span class="fcsm">2k+ reviews</span></div>
+                  <!-- Floating Card 2 (Center Right: Fast Delivery) -->
+                  <div class="hero-float-card hfc-2">
+                     <div class="hfc-icon green"><i class="{{ $homeSettings['card2_icon'] ?? 'fas fa-clock' }}"></i></div>
+                     <div class="hfc-content">
+                        <span class="hfc-title">{{ $homeSettings['card2_title'] ?? '20 min' }}</span>
+                        <span class="hfc-subtitle">{{ $homeSettings['card2_subtitle'] ?? 'Fast delivery' }}</span>
+                     </div>
                   </div>
-                  <div class="fcard fc3">
-                     <div class="fcoi g"><i class="fas fa-clock"></i></div>
-                     <div><span class="fcnum">20 min</span><span class="fcsm">Fast delivery</span></div>
+                  <!-- Floating Card 3 (Bottom Left: Rating & Reviews) -->
+                  <div class="hero-float-card hfc-3">
+                     <div class="hfc-icon yellow"><i class="{{ $homeSettings['card3_icon'] ?? 'fas fa-star' }}"></i></div>
+                     <div class="hfc-content">
+                        <span class="hfc-title">{{ $homeSettings['card3_title'] ?? '4.9/5' }}</span>
+                        <span class="hfc-subtitle">{{ $homeSettings['card3_subtitle'] ?? '2k+ reviews' }}</span>
+                     </div>
                   </div>
                </div>
             </div>
@@ -158,10 +179,9 @@
          <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-right">
                <div class="astack">
-                  <div class="aexp"><span class="anum">{{ $aboutSettings['years_badge'] ?? '12+' }}</span><small>Years
-                        of<br />Excellence</small></div>
-                  <div class="amain"><img src="{{ asset('img/about1.jpg') }}" alt="Restaurant" /></div>
-                  <div class="asm"><img src="{{ asset('img/about2.jpg') }}" alt="" /></div>
+                  <div class="aexp"><span class="anum">{{ $aboutSettings['years_badge'] ?? '12+' }}</span><small>{!! nl2br(e($aboutSettings['years_badge_text'] ?? "Years of\nExcellence")) !!}</small></div>
+                  <div class="amain"><img src="{{ asset($aboutSettings['image1'] ?? 'img/about1.jpg') }}" alt="Restaurant" /></div>
+                  <div class="asm"><img src="{{ asset($aboutSettings['image2'] ?? 'img/about2.jpg') }}" alt="Quality Food" /></div>
                </div>
             </div>
             <div class="col-lg-7" data-aos="fade-left">
@@ -173,28 +193,37 @@
                   {{ $aboutSettings['desc'] ?? "Founded in 2012, Fast Food began as a small corner joint with a big dream - to serve food that brings people together. Today we're proud to serve thousands of happy customers every week with the same passion that started it all." }}
                </p>
                <div class="mb-4">
-                  <div class="fti">
-                     <div class="ftico r"><i class="fas fa-leaf"></i></div>
-                     <div>
-                        <h6>100% Fresh Ingredients</h6>
-                        <p>We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness.
-                        </p>
+                  @forelse($aboutSettings['points'] ?? [] as $point)
+                     <div class="fti">
+                        <div class="ftico {{ $point['color'] ?? 'r' }}"><i class="{{ $point['icon'] ?? 'fas fa-leaf' }}"></i></div>
+                        <div>
+                           <h6>{{ $point['title'] ?? '' }}</h6>
+                           <p>{{ $point['desc'] ?? '' }}</p>
+                        </div>
                      </div>
-                  </div>
-                  <div class="fti">
-                     <div class="ftico y"><i class="fas fa-award"></i></div>
-                     <div>
-                        <h6>Award-Winning Recipes</h6>
-                        <p>Our signature recipes have won national culinary awards 5 years in a row.</p>
+                  @empty
+                     <div class="fti">
+                        <div class="ftico r"><i class="fas fa-leaf"></i></div>
+                        <div>
+                           <h6>100% Fresh Farm Ingredients</h6>
+                           <p>We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness and flavor integrity.</p>
+                        </div>
                      </div>
-                  </div>
-                  <div class="fti">
-                     <div class="ftico g"><i class="fas fa-shipping-fast"></i></div>
-                     <div>
-                        <h6>Lightning-Fast Delivery</h6>
-                        <p>Order online and get hot, fresh food at your door in under 25 minutes, guaranteed.</p>
+                     <div class="fti">
+                        <div class="ftico y"><i class="fas fa-award"></i></div>
+                        <div>
+                           <h6>Award-Winning Master Chefs</h6>
+                           <p>Our kitchen is led by executive chefs whose signature recipes have earned national culinary recognition.</p>
+                        </div>
                      </div>
-                  </div>
+                     <div class="fti">
+                        <div class="ftico g"><i class="fas fa-shipping-fast"></i></div>
+                        <div>
+                           <h6>Fast &amp; Eco-Conscious Delivery</h6>
+                           <p>Order online and enjoy piping hot, fresh comfort food delivered straight to your doorstep in under 35 minutes.</p>
+                        </div>
+                     </div>
+                  @endforelse
                </div>
                <a href="{{ route('about') }}" class="btn-red"><i class="fas fa-book-open"></i>Read Our Story</a>
             </div>
@@ -438,9 +467,9 @@
                      <div class="chimg">
                         <img src="{{ asset($chef['image']) }}" alt="{{ $chef['name'] }}" />
                         <div class="chsoc">
-                           <a href="#"><i class="fab fa-instagram"></i></a>
-                           <a href="#"><i class="fab fa-facebook-f"></i></a>
-                           <a href="#"><i class="fab fa-twitter"></i></a>
+                           <a href="{{ !empty($chef['instagram']) ? $chef['instagram'] : '#' }}" target="{{ !empty($chef['instagram']) ? '_blank' : '_self' }}"><i class="fab fa-instagram"></i></a>
+                           <a href="{{ !empty($chef['facebook']) ? $chef['facebook'] : '#' }}" target="{{ !empty($chef['facebook']) ? '_blank' : '_self' }}"><i class="fab fa-facebook-f"></i></a>
+                           <a href="{{ !empty($chef['twitter']) ? $chef['twitter'] : '#' }}" target="{{ !empty($chef['twitter']) ? '_blank' : '_self' }}"><i class="fab fa-twitter"></i></a>
                         </div>
                      </div>
                      <div class="chbody">

@@ -69,6 +69,33 @@ class RestaurantDataService
         if (!isset($home['hero_highlight'])) {
             $home['hero_highlight'] = 'Fast Food';
         }
+
+        // Hero Badge & Buttons
+        $home['hero_badge_icon'] = $home['hero_badge_icon'] ?? 'fas fa-star';
+        $home['hero_btn1_text'] = $home['hero_btn1_text'] ?? 'Explore Menu';
+        $home['hero_btn1_url'] = $home['hero_btn1_url'] ?? '';
+        $home['hero_btn2_text'] = $home['hero_btn2_text'] ?? 'Watch Our Story';
+        $home['hero_btn2_url'] = $home['hero_btn2_url'] ?? 'https://www.youtube.com/watch?v=RXv_uIN6e-Y';
+
+        // Stats Labels
+        $home['happy_customers_label'] = $home['happy_customers_label'] ?? 'Happy Customers';
+        $home['menu_count_label'] = $home['menu_count_label'] ?? 'Menu Items';
+        $home['chefs_count_label'] = $home['chefs_count_label'] ?? 'Expert Chefs';
+        $home['experience_years_label'] = $home['experience_years_label'] ?? 'Experience';
+
+        // Hero Floating Cards (Badges around hero image)
+        $home['card1_title'] = $home['card1_title'] ?? 'Hot Deal';
+        $home['card1_subtitle'] = $home['card1_subtitle'] ?? '30% off today';
+        $home['card1_icon'] = $home['card1_icon'] ?? 'fas fa-fire';
+
+        $home['card2_title'] = $home['card2_title'] ?? '20 min';
+        $home['card2_subtitle'] = $home['card2_subtitle'] ?? 'Fast delivery';
+        $home['card2_icon'] = $home['card2_icon'] ?? 'fas fa-clock';
+
+        $home['card3_title'] = $home['card3_title'] ?? '4.9/5';
+        $home['card3_subtitle'] = $home['card3_subtitle'] ?? '2k+ reviews';
+        $home['card3_icon'] = $home['card3_icon'] ?? 'fas fa-star';
+
         return $home;
     }
 
@@ -85,7 +112,54 @@ class RestaurantDataService
     public function getAboutSettings(): array
     {
         $data = $this->getAllData();
-        return $data['about'] ?? [];
+        $about = $data['about'] ?? [];
+
+        $defaultPoints = [
+            [
+                'icon' => 'fas fa-leaf',
+                'color' => 'r',
+                'title' => '100% Fresh Farm Ingredients',
+                'desc' => 'We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness and flavor integrity.',
+            ],
+            [
+                'icon' => 'fas fa-award',
+                'color' => 'y',
+                'title' => 'Award-Winning Master Chefs',
+                'desc' => 'Our kitchen is led by executive chefs whose signature recipes have earned national culinary recognition.',
+            ],
+            [
+                'icon' => 'fas fa-shipping-fast',
+                'color' => 'g',
+                'title' => 'Fast & Eco-Conscious Delivery',
+                'desc' => 'Order online and enjoy piping hot, fresh comfort food delivered straight to your doorstep in under 35 minutes.',
+            ],
+        ];
+
+        if (!isset($about['points']) || !is_array($about['points']) || empty($about['points'])) {
+            $about['points'] = $defaultPoints;
+        } else {
+            foreach ($about['points'] as $i => &$pt) {
+                $pt['icon'] = $pt['icon'] ?? ($defaultPoints[$i]['icon'] ?? 'fas fa-check-circle');
+                $pt['color'] = $pt['color'] ?? ($defaultPoints[$i]['color'] ?? 'r');
+                $pt['title'] = $pt['title'] ?? ($defaultPoints[$i]['title'] ?? '');
+                $pt['desc'] = $pt['desc'] ?? ($defaultPoints[$i]['desc'] ?? '');
+            }
+            unset($pt);
+        }
+
+        $about['tagline'] = $about['tagline'] ?? 'Our Heritage';
+        $about['title'] = $about['title'] ?? "We Invite You to Visit\nOur Food Restaurant";
+        $about['desc'] = $about['desc'] ?? "Founded in 2012, Fast Food began as a small corner joint with a big dream - to serve food that brings people together. Today we're proud to serve thousands of happy customers every week with the same passion that started it all.";
+        $about['years_badge'] = $about['years_badge'] ?? '12+';
+        $about['years_badge_text'] = $about['years_badge_text'] ?? "Years of\nExcellence";
+        $about['image1'] = $about['image1'] ?? 'img/about1.jpg';
+        $about['image2'] = $about['image2'] ?? 'img/about2.jpg';
+        $about['btn1_text'] = $about['btn1_text'] ?? 'Explore Our Menu';
+        $about['btn1_url'] = $about['btn1_url'] ?? '';
+        $about['btn2_text'] = $about['btn2_text'] ?? 'Book a Table';
+        $about['btn2_url'] = $about['btn2_url'] ?? '';
+
+        return $about;
     }
 
     public function updateAboutSettings(array $settings): void
@@ -133,7 +207,8 @@ class RestaurantDataService
                     return $this->cachedSiteSettings;
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // 2. Fallback to JSON store
         $data = $this->getAllData();
@@ -156,15 +231,20 @@ class RestaurantDataService
                     SiteSetting::create($settings);
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // 2. Save to JSON store
         $data = $this->getAllData();
         $data['settings'] = array_merge($data['settings'] ?? [], $settings);
-        if (isset($settings['phone'])) $data['home']['phone'] = $settings['phone'];
-        if (isset($settings['email'])) $data['home']['email'] = $settings['email'];
-        if (isset($settings['address'])) $data['home']['address'] = $settings['address'];
-        if (isset($settings['announcement'])) $data['home']['announcement'] = $settings['announcement'];
+        if (isset($settings['phone']))
+            $data['home']['phone'] = $settings['phone'];
+        if (isset($settings['email']))
+            $data['home']['email'] = $settings['email'];
+        if (isset($settings['address']))
+            $data['home']['address'] = $settings['address'];
+        if (isset($settings['announcement']))
+            $data['home']['announcement'] = $settings['announcement'];
         $this->saveAllData($data);
     }
 
@@ -181,7 +261,7 @@ class RestaurantDataService
     {
         $items = $this->getMenuItems();
         foreach ($items as $item) {
-            if ((int)$item['id'] === $id) {
+            if ((int) $item['id'] === $id) {
                 return $item;
             }
         }
@@ -193,10 +273,14 @@ class RestaurantDataService
         $data = $this->getAllData();
         $items = $data['menu_items'] ?? [];
 
+        if (is_string($itemData['tags'] ?? null)) {
+            $itemData['tags'] = array_values(array_filter(array_map('trim', explode(',', $itemData['tags']))));
+        }
+
         if (!empty($itemData['id'])) {
-            $id = (int)$itemData['id'];
+            $id = (int) $itemData['id'];
             foreach ($items as $idx => $existing) {
-                if ((int)$existing['id'] === $id) {
+                if ((int) $existing['id'] === $id) {
                     $items[$idx] = array_merge($existing, $itemData);
                     $data['menu_items'] = array_values($items);
                     $this->saveAllData($data);
@@ -208,14 +292,17 @@ class RestaurantDataService
         // New item
         $maxId = 0;
         foreach ($items as $item) {
-            if ((int)$item['id'] > $maxId) {
-                $maxId = (int)$item['id'];
+            if ((int) $item['id'] > $maxId) {
+                $maxId = (int) $item['id'];
             }
         }
         $itemData['id'] = $maxId + 1;
-        if (empty($itemData['rating'])) $itemData['rating'] = 5.0;
-        if (empty($itemData['reviews'])) $itemData['reviews'] = 1;
-        if (empty($itemData['image'])) $itemData['image'] = 'img/menu/1.jpg';
+        if (empty($itemData['rating']))
+            $itemData['rating'] = 5.0;
+        if (empty($itemData['reviews']))
+            $itemData['reviews'] = 1;
+        if (empty($itemData['image']))
+            $itemData['image'] = 'img/menu/1.jpg';
         if (is_string($itemData['tags'] ?? null)) {
             $itemData['tags'] = array_map('trim', explode(',', $itemData['tags']));
         }
@@ -231,7 +318,7 @@ class RestaurantDataService
         $data = $this->getAllData();
         $items = $data['menu_items'] ?? [];
         $initialCount = count($items);
-        $filtered = array_filter($items, fn($i) => (int)$i['id'] !== $id);
+        $filtered = array_filter($items, fn($i) => (int) $i['id'] !== $id);
 
         if (count($filtered) !== $initialCount) {
             $data['menu_items'] = array_values($filtered);
@@ -256,9 +343,9 @@ class RestaurantDataService
         $chefs = $data['chefs'] ?? [];
 
         if (!empty($chefData['id'])) {
-            $id = (int)$chefData['id'];
+            $id = (int) $chefData['id'];
             foreach ($chefs as $idx => $existing) {
-                if ((int)($existing['id'] ?? 0) === $id) {
+                if ((int) ($existing['id'] ?? 0) === $id) {
                     $chefs[$idx] = array_merge($existing, $chefData);
                     $data['chefs'] = array_values($chefs);
                     $this->saveAllData($data);
@@ -269,12 +356,13 @@ class RestaurantDataService
 
         $maxId = 0;
         foreach ($chefs as $chef) {
-            if ((int)($chef['id'] ?? 0) > $maxId) {
-                $maxId = (int)$chef['id'];
+            if ((int) ($chef['id'] ?? 0) > $maxId) {
+                $maxId = (int) $chef['id'];
             }
         }
         $chefData['id'] = $maxId + 1;
-        if (empty($chefData['image'])) $chefData['image'] = 'img/chefs/1.jpg';
+        if (empty($chefData['image']))
+            $chefData['image'] = 'img/chefs/1.jpg';
 
         $chefs[] = $chefData;
         $data['chefs'] = array_values($chefs);
@@ -286,7 +374,7 @@ class RestaurantDataService
     {
         $data = $this->getAllData();
         $chefs = $data['chefs'] ?? [];
-        $filtered = array_filter($chefs, fn($c) => (int)($c['id'] ?? 0) !== $id);
+        $filtered = array_filter($chefs, fn($c) => (int) ($c['id'] ?? 0) !== $id);
 
         $data['chefs'] = array_values($filtered);
         $this->saveAllData($data);
@@ -350,7 +438,7 @@ class RestaurantDataService
         $items = $this->getGalleryItems();
 
         if (!empty($itemData['id'])) {
-            $id = (int)$itemData['id'];
+            $id = (int) $itemData['id'];
             foreach ($items as &$item) {
                 if ($item['id'] === $id) {
                     $item = array_merge($item, $itemData);
@@ -374,7 +462,7 @@ class RestaurantDataService
     {
         $data = $this->getAllData();
         $items = $this->getGalleryItems();
-        $filtered = array_filter($items, fn($item) => (int)$item['id'] !== $id);
+        $filtered = array_filter($items, fn($item) => (int) $item['id'] !== $id);
 
         if (count($filtered) !== count($items)) {
             $data['gallery_items'] = array_values($filtered);
@@ -413,7 +501,8 @@ class RestaurantDataService
                     return $dbItems;
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         return $data['reservations'] ?? [];
@@ -439,7 +528,8 @@ class RestaurantDataService
                 $created = Reservation::create($newReservation);
                 $newReservation['id'] = $created->id;
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // 2. Synchronize with JSON store
         $data = $this->getAllData();
@@ -447,8 +537,8 @@ class RestaurantDataService
         if (empty($newReservation['id'])) {
             $maxId = 0;
             foreach ($reservations as $r) {
-                if ((int)($r['id'] ?? 0) > $maxId) {
-                    $maxId = (int)$r['id'];
+                if ((int) ($r['id'] ?? 0) > $maxId) {
+                    $maxId = (int) $r['id'];
                 }
             }
             $newReservation['id'] = $maxId + 1;
@@ -470,13 +560,14 @@ class RestaurantDataService
                     $item->update(['status' => $status]);
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $reservations = $data['reservations'] ?? [];
 
         foreach ($reservations as $idx => $r) {
-            if ((int)$r['id'] === $id) {
+            if ((int) $r['id'] === $id) {
                 $reservations[$idx]['status'] = $status;
                 $data['reservations'] = $reservations;
                 $this->saveAllData($data);
@@ -492,11 +583,12 @@ class RestaurantDataService
             if (Schema::hasTable('reservations')) {
                 Reservation::where('id', $id)->delete();
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $reservations = $data['reservations'] ?? [];
-        $filtered = array_filter($reservations, fn($r) => (int)$r['id'] !== $id);
+        $filtered = array_filter($reservations, fn($r) => (int) $r['id'] !== $id);
 
         $data['reservations'] = array_values($filtered);
         $this->saveAllData($data);
@@ -516,7 +608,7 @@ class RestaurantDataService
                         Review::create([
                             'name' => $rv['name'] ?? 'Guest Customer',
                             'role' => $rv['role'] ?? 'Verified Diner',
-                            'rating' => (int)($rv['rating'] ?? 5),
+                            'rating' => (int) ($rv['rating'] ?? 5),
                             'text' => $rv['text'] ?? '',
                             'image' => $rv['image'] ?? 'img/testimonial/1.jpg',
                             'status' => $rv['status'] ?? 'Approved',
@@ -528,7 +620,8 @@ class RestaurantDataService
                     return $dbItems;
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         return $data['reviews'] ?? [];
@@ -539,7 +632,7 @@ class RestaurantDataService
         $newReview = [
             'name' => $revData['name'] ?? 'Guest Customer',
             'role' => $revData['role'] ?? 'Verified Diner',
-            'rating' => (int)($revData['rating'] ?? 5),
+            'rating' => (int) ($revData['rating'] ?? 5),
             'text' => $revData['text'] ?? ($revData['message'] ?? 'Delicious food and excellent service!'),
             'image' => $revData['image'] ?? ('img/testimonial/' . (rand(1, 4)) . '.jpg'),
             'status' => $revData['status'] ?? 'Approved',
@@ -552,7 +645,8 @@ class RestaurantDataService
                 $created = Review::create($newReview);
                 $newReview['id'] = $created->id;
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // 2. Synchronize with JSON store
         $data = $this->getAllData();
@@ -560,8 +654,8 @@ class RestaurantDataService
         if (empty($newReview['id'])) {
             $maxId = 0;
             foreach ($reviews as $r) {
-                if ((int)($r['id'] ?? 0) > $maxId) {
-                    $maxId = (int)$r['id'];
+                if ((int) ($r['id'] ?? 0) > $maxId) {
+                    $maxId = (int) $r['id'];
                 }
             }
             $newReview['id'] = $maxId + 1;
@@ -583,13 +677,14 @@ class RestaurantDataService
                     $item->update(['status' => $status]);
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $reviews = $data['reviews'] ?? [];
 
         foreach ($reviews as $idx => $r) {
-            if ((int)$r['id'] === $id) {
+            if ((int) $r['id'] === $id) {
                 $reviews[$idx]['status'] = $status;
                 $data['reviews'] = $reviews;
                 $this->saveAllData($data);
@@ -605,11 +700,12 @@ class RestaurantDataService
             if (Schema::hasTable('reviews')) {
                 Review::where('id', $id)->delete();
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $reviews = $data['reviews'] ?? [];
-        $filtered = array_filter($reviews, fn($r) => (int)$r['id'] !== $id);
+        $filtered = array_filter($reviews, fn($r) => (int) $r['id'] !== $id);
 
         $data['reviews'] = array_values($filtered);
         $this->saveAllData($data);
@@ -641,7 +737,8 @@ class RestaurantDataService
                     return $dbItems;
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         return $data['contacts'] ?? [];
@@ -665,7 +762,8 @@ class RestaurantDataService
                 $created = Contact::create($newContact);
                 $newContact['id'] = $created->id;
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         // 2. Synchronize with JSON store
         $data = $this->getAllData();
@@ -673,8 +771,8 @@ class RestaurantDataService
         if (empty($newContact['id'])) {
             $maxId = 0;
             foreach ($contacts as $c) {
-                if ((int)($c['id'] ?? 0) > $maxId) {
-                    $maxId = (int)$c['id'];
+                if ((int) ($c['id'] ?? 0) > $maxId) {
+                    $maxId = (int) $c['id'];
                 }
             }
             $newContact['id'] = $maxId + 1;
@@ -696,13 +794,14 @@ class RestaurantDataService
                     $item->update(['is_read' => true]);
                 }
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $contacts = $data['contacts'] ?? [];
 
         foreach ($contacts as $idx => $c) {
-            if ((int)$c['id'] === $id) {
+            if ((int) $c['id'] === $id) {
                 $contacts[$idx]['is_read'] = true;
                 $data['contacts'] = $contacts;
                 $this->saveAllData($data);
@@ -718,11 +817,12 @@ class RestaurantDataService
             if (Schema::hasTable('contacts')) {
                 Contact::where('id', $id)->delete();
             }
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         $data = $this->getAllData();
         $contacts = $data['contacts'] ?? [];
-        $filtered = array_filter($contacts, fn($c) => (int)$c['id'] !== $id);
+        $filtered = array_filter($contacts, fn($c) => (int) $c['id'] !== $id);
 
         $data['contacts'] = array_values($filtered);
         $this->saveAllData($data);
@@ -789,27 +889,49 @@ class RestaurantDataService
                 'deal_title' => 'Get 30% Off Our Signature Burger Meal',
                 'deal_desc' => 'Don\'t miss our weekend special - grab our award-winning signature burger combo with loaded fries and a premium shake at an unbeatable price.',
                 'deal_price' => '$17.49',
-                'deal_old_price' => '$24.99'
+                'deal_old_price' => '$24.99',
+                'card1_title' => 'Hot Deal',
+                'card1_subtitle' => '30% off today',
+                'card1_icon' => 'fas fa-fire',
+                'card2_title' => '20 min',
+                'card2_subtitle' => 'Fast delivery',
+                'card2_icon' => 'fas fa-clock',
+                'card3_title' => '4.9/5',
+                'card3_subtitle' => '2k+ reviews',
+                'card3_icon' => 'fas fa-star'
             ],
             'about' => [
                 'tagline' => 'Our Story & Heritage',
                 'title' => 'We Invite You to Visit Our Food Restaurant',
                 'desc' => 'Founded in 2012, Fast Food began as a small corner joint with a big dream - to serve food that brings people together. Today we\'re proud to serve thousands of happy customers every week with the same passion that started it all.',
                 'years_badge' => '12+',
+                'years_badge_text' => "Years of\nExcellence",
+                'image1' => 'img/about1.jpg',
+                'image2' => 'img/about2.jpg',
+                'btn1_text' => 'Explore Our Menu',
+                'btn1_url' => '',
+                'btn2_text' => 'Book a Table',
+                'btn2_url' => '',
                 'points' => [
                     [
-                        'title' => '100% Fresh Ingredients',
-                        'desc' => 'We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness.'
+                        'icon' => 'fas fa-leaf',
+                        'color' => 'r',
+                        'title' => '100% Fresh Farm Ingredients',
+                        'desc' => 'We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness and flavor integrity.',
                     ],
                     [
-                        'title' => 'Award-Winning Recipes',
-                        'desc' => 'Our signature recipes have won national culinary awards 5 years in a row.'
+                        'icon' => 'fas fa-award',
+                        'color' => 'y',
+                        'title' => 'Award-Winning Master Chefs',
+                        'desc' => 'Our kitchen is led by executive chefs whose signature recipes have earned national culinary recognition.',
                     ],
                     [
-                        'title' => 'Lightning-Fast Delivery',
-                        'desc' => 'Order online and get hot, fresh food at your door in under 25 minutes, guaranteed.'
-                    ]
-                ]
+                        'icon' => 'fas fa-shipping-fast',
+                        'color' => 'g',
+                        'title' => 'Fast & Eco-Conscious Delivery',
+                        'desc' => 'Order online and enjoy piping hot, fresh comfort food delivered straight to your doorstep in under 35 minutes.',
+                    ],
+                ],
             ],
             'menu_items' => [
                 [

@@ -62,6 +62,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Chefs Management
     Route::get('/chefs', [AdminController::class, 'chefs'])->name('chefs');
+    Route::get('/chef', [AdminController::class, 'chefs'])->name('chef');
     Route::post('/chefs/store', [AdminController::class, 'storeChef'])->name('chefs.store');
     Route::post('/chefs/delete/{id}', [AdminController::class, 'deleteChef'])->name('chefs.delete');
 

@@ -22,9 +22,9 @@
          <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-right">
                <div class="astack">
-                  <div class="aexp"><span class="anum">{{ $aboutSettings['years_badge'] ?? '12+' }}</span><small>Years of<br/>Excellence</small></div>
-                  <div class="amain"><img src="{{ asset('img/about1.jpg') }}" alt="Restaurant Story"/></div>
-                  <div class="asm"><img src="{{ asset('img/about2.jpg') }}" alt="Quality Food"/></div>
+                  <div class="aexp"><span class="anum">{{ $aboutSettings['years_badge'] ?? '12+' }}</span><small>{!! nl2br(e($aboutSettings['years_badge_text'] ?? "Years of\nExcellence")) !!}</small></div>
+                  <div class="amain"><img src="{{ asset($aboutSettings['image1'] ?? 'img/about1.jpg') }}" alt="Restaurant Story"/></div>
+                  <div class="asm"><img src="{{ asset($aboutSettings['image2'] ?? 'img/about2.jpg') }}" alt="Quality Food"/></div>
                </div>
             </div>
             <div class="col-lg-7" data-aos="fade-left">
@@ -33,31 +33,41 @@
                <div class="sline lft"></div>
                <p class="sdesc mb-4">{{ $aboutSettings['desc'] ?? "Founded in 2012, Fast Food began as a small corner joint with a big dream - to serve food that brings people together. Today we're proud to serve thousands of happy customers every week with the same passion that started it all." }}</p>
                <div class="mb-4">
-                  <div class="fti">
-                     <div class="ftico r"><i class="fas fa-leaf"></i></div>
-                     <div>
-                        <h6>100% Fresh Farm Ingredients</h6>
-                        <p>We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness and flavor integrity.</p>
+                  @forelse($aboutSettings['points'] ?? [] as $point)
+                     <div class="fti">
+                        <div class="ftico {{ $point['color'] ?? 'r' }}"><i class="{{ $point['icon'] ?? 'fas fa-leaf' }}"></i></div>
+                        <div>
+                           <h6>{{ $point['title'] ?? '' }}</h6>
+                           <p>{{ $point['desc'] ?? '' }}</p>
+                        </div>
                      </div>
-                  </div>
-                  <div class="fti">
-                     <div class="ftico y"><i class="fas fa-award"></i></div>
-                     <div>
-                        <h6>Award-Winning Master Chefs</h6>
-                        <p>Our kitchen is led by executive chefs whose signature recipes have earned national culinary recognition.</p>
+                  @empty
+                     <div class="fti">
+                        <div class="ftico r"><i class="fas fa-leaf"></i></div>
+                        <div>
+                           <h6>100% Fresh Farm Ingredients</h6>
+                           <p>We source locally and sustainably. Every ingredient is hand-picked daily for maximum freshness and flavor integrity.</p>
+                        </div>
                      </div>
-                  </div>
-                  <div class="fti">
-                     <div class="ftico g"><i class="fas fa-shipping-fast"></i></div>
-                     <div>
-                        <h6>Fast &amp; Eco-Conscious Delivery</h6>
-                        <p>Order online and enjoy piping hot, fresh comfort food delivered straight to your doorstep in under 25 minutes.</p>
+                     <div class="fti">
+                        <div class="ftico y"><i class="fas fa-award"></i></div>
+                        <div>
+                           <h6>Award-Winning Master Chefs</h6>
+                           <p>Our kitchen is led by executive chefs whose signature recipes have earned national culinary recognition.</p>
+                        </div>
                      </div>
-                  </div>
+                     <div class="fti">
+                        <div class="ftico g"><i class="fas fa-shipping-fast"></i></div>
+                        <div>
+                           <h6>Fast &amp; Eco-Conscious Delivery</h6>
+                           <p>Order online and enjoy piping hot, fresh comfort food delivered straight to your doorstep in under 35 minutes.</p>
+                        </div>
+                     </div>
+                  @endforelse
                </div>
                <div class="d-flex gap-3 flex-wrap">
-                  <a href="{{ route('menu') }}" class="btn-red"><i class="fas fa-utensils"></i>Explore Our Menu</a>
-                  <a href="{{ route('reservation') }}" class="btnw" style="border:1px solid #ddd;color:#333;"><i class="fas fa-calendar-check me-1"></i>Book a Table</a>
+                  <a href="{{ !empty($aboutSettings['btn1_url']) ? $aboutSettings['btn1_url'] : route('menu') }}" class="btn-red"><i class="fas fa-utensils"></i>{{ $aboutSettings['btn1_text'] ?? 'Explore Our Menu' }}</a>
+                  <a href="{{ !empty($aboutSettings['btn2_url']) ? $aboutSettings['btn2_url'] : route('reservation') }}" class="btnw" style="border:1px solid #ddd;color:#333;"><i class="fas fa-calendar-check me-1"></i>{{ $aboutSettings['btn2_text'] ?? 'Book a Table' }}</a>
                </div>
             </div>
          </div>
@@ -80,9 +90,9 @@
                      <div class="chimg">
                         <img src="{{ asset($chef['image']) }}" alt="{{ $chef['name'] }}"/>
                         <div class="chsoc">
-                           <a href="#"><i class="fab fa-instagram"></i></a>
-                           <a href="#"><i class="fab fa-facebook-f"></i></a>
-                           <a href="#"><i class="fab fa-twitter"></i></a>
+                           <a href="{{ !empty($chef['instagram']) ? $chef['instagram'] : '#' }}" target="{{ !empty($chef['instagram']) ? '_blank' : '_self' }}"><i class="fab fa-instagram"></i></a>
+                           <a href="{{ !empty($chef['facebook']) ? $chef['facebook'] : '#' }}" target="{{ !empty($chef['facebook']) ? '_blank' : '_self' }}"><i class="fab fa-facebook-f"></i></a>
+                           <a href="{{ !empty($chef['twitter']) ? $chef['twitter'] : '#' }}" target="{{ !empty($chef['twitter']) ? '_blank' : '_self' }}"><i class="fab fa-twitter"></i></a>
                         </div>
                      </div>
                      <div class="chbody">

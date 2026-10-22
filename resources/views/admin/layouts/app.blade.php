@@ -642,7 +642,7 @@
             <!-- 3. CHEFS -->
             <div class="nav-item-admin">
                 <a href="{{ route('admin.chefs') }}"
-                    class="nav-link-admin {{ request()->routeIs('admin.chefs*') ? 'active' : '' }}">
+                    class="nav-link-admin {{ (request()->routeIs('admin.chefs*') || request()->routeIs('admin.chef*')) ? 'active' : '' }}">
                     <div class="nav-lead">
                         <i class="fas fa-user-tie"></i>
                         <span>Chefs</span>

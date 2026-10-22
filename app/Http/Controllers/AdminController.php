@@ -61,7 +61,24 @@ class AdminController extends Controller
             'deal_title' => 'nullable|string|max:150',
             'deal_desc' => 'nullable|string|max:400',
             'deal_price' => 'nullable|string|max:50',
-            'deal_old_price' => 'nullable|string|max:50',
+            'hero_badge_icon' => 'nullable|string|max:100',
+            'hero_btn1_text' => 'nullable|string|max:100',
+            'hero_btn1_url' => 'nullable|string|max:255',
+            'hero_btn2_text' => 'nullable|string|max:100',
+            'hero_btn2_url' => 'nullable|string|max:255',
+            'happy_customers_label' => 'nullable|string|max:100',
+            'menu_count_label' => 'nullable|string|max:100',
+            'chefs_count_label' => 'nullable|string|max:100',
+            'experience_years_label' => 'nullable|string|max:100',
+            'card1_title' => 'nullable|string|max:100',
+            'card1_subtitle' => 'nullable|string|max:100',
+            'card1_icon' => 'nullable|string|max:100',
+            'card2_title' => 'nullable|string|max:100',
+            'card2_subtitle' => 'nullable|string|max:100',
+            'card2_icon' => 'nullable|string|max:100',
+            'card3_title' => 'nullable|string|max:100',
+            'card3_subtitle' => 'nullable|string|max:100',
+            'card3_icon' => 'nullable|string|max:100',
         ]);
 
         // Process Hero Image Upload
@@ -112,13 +129,71 @@ class AdminController extends Controller
         $data = $request->validate([
             'tagline' => 'required|string|max:100',
             'title' => 'required|string|max:200',
-            'desc' => 'required|string|max:1000',
-            'years_badge' => 'nullable|string|max:50'
+            'desc' => 'required|string|max:1500',
+            'years_badge' => 'nullable|string|max:50',
+            'years_badge_text' => 'nullable|string|max:100',
+            'image1' => 'nullable|string|max:255',
+            'image2' => 'nullable|string|max:255',
+            'image1_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'image2_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'btn1_text' => 'nullable|string|max:100',
+            'btn1_url' => 'nullable|string|max:255',
+            'btn2_text' => 'nullable|string|max:100',
+            'btn2_url' => 'nullable|string|max:255',
+            'points' => 'nullable|array',
+            'points.*.title' => 'nullable|string|max:150',
+            'points.*.desc' => 'nullable|string|max:500',
+            'points.*.icon' => 'nullable|string|max:100',
+            'points.*.color' => 'nullable|string|max:50',
         ]);
+
+        // Process Main About Image Upload
+        if ($request->hasFile('image1_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image1_file');
+            $fileName = 'about1_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image1'] = 'img/uploads/' . $fileName;
+        }
+
+        // Process Secondary Floating Image Upload
+        if ($request->hasFile('image2_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image2_file');
+            $fileName = 'about2_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image2'] = 'img/uploads/' . $fileName;
+        }
+
+        unset($data['image1_file'], $data['image2_file']);
+
+        // Process & Sanitize Quality Pillars / Feature Highlights
+        if (isset($data['points']) && is_array($data['points'])) {
+            $cleanedPoints = [];
+            foreach ($data['points'] as $pt) {
+                $t = trim($pt['title'] ?? '');
+                $d = trim($pt['desc'] ?? '');
+                if ($t !== '' || $d !== '') {
+                    $cleanedPoints[] = [
+                        'title' => $t,
+                        'desc' => $d,
+                        'icon' => !empty(trim($pt['icon'] ?? '')) ? trim($pt['icon']) : 'fas fa-check-circle',
+                        'color' => !empty(trim($pt['color'] ?? '')) ? trim($pt['color']) : 'r',
+                    ];
+                }
+            }
+            $data['points'] = $cleanedPoints;
+        }
 
         $this->dataService->updateAboutSettings($data);
 
-        return back()->with('success', 'About page content updated successfully!');
+        return back()->with('success', 'About page content and quality features updated successfully!');
     }
 
     /**
@@ -139,15 +214,17 @@ class AdminController extends Controller
             'id' => 'nullable|integer',
             'title' => 'required|string|max:150',
             'category' => 'required|string|max:50',
+            'category_name' => 'nullable|string|max:50',
             'price' => 'required|numeric|min:0',
             'old_price' => 'nullable|numeric|min:0',
             'cal' => 'nullable|integer',
             'time' => 'nullable|integer',
             'badge' => 'nullable|string|max:50',
             'badge_class' => 'nullable|string|max:50',
-            'desc' => 'required|string|max:500',
-            'tags' => 'nullable|string|max:150',
-            'image' => 'nullable|string|max:255'
+            'desc' => 'required|string|max:1000',
+            'tags' => 'nullable|string|max:200',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120'
         ]);
 
         $categoryNames = [
@@ -156,9 +233,26 @@ class AdminController extends Controller
             'chicken' => 'Chicken',
             'wraps' => 'Wraps',
             'desserts' => 'Desserts',
-            'pasta' => 'Pasta'
+            'pasta' => 'Pasta',
+            'drinks' => 'Drinks',
+            'salads' => 'Salads'
         ];
-        $data['category_name'] = $categoryNames[$data['category']] ?? ucfirst($data['category']);
+        if (empty($data['category_name'])) {
+            $data['category_name'] = $categoryNames[$data['category']] ?? ucfirst($data['category']);
+        }
+
+        // Handle Image Upload
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'menu_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
 
         if (empty($data['image'])) {
             $catImages = [
@@ -167,9 +261,26 @@ class AdminController extends Controller
                 'chicken' => 'img/menu/3.jpg',
                 'wraps' => 'img/menu/4.jpg',
                 'desserts' => 'img/menu/5.jpg',
-                'pasta' => 'img/menu/6.jpg'
+                'pasta' => 'img/menu/6.jpg',
+                'drinks' => 'img/menu/1.jpg',
+                'salads' => 'img/menu/2.jpg'
             ];
             $data['image'] = $catImages[$data['category']] ?? 'img/menu/1.jpg';
+        }
+
+        // Format tags
+        if (!empty($data['tags']) && is_string($data['tags'])) {
+            $data['tags'] = array_values(array_filter(array_map('trim', explode(',', $data['tags']))));
+        }
+
+        // Format badge class
+        if (!empty($data['badge']) && empty($data['badge_class'])) {
+            $bLower = strtolower($data['badge']);
+            if (str_contains($bLower, 'new')) {
+                $data['badge_class'] = 'new';
+            } else {
+                $data['badge_class'] = 'hot';
+            }
         }
 
         $this->dataService->saveMenuItem($data);
@@ -182,7 +293,7 @@ class AdminController extends Controller
      */
     public function deleteMenuItem($id)
     {
-        $this->dataService->deleteMenuItem((int)$id);
+        $this->dataService->deleteMenuItem((int) $id);
         return back()->with('success', 'Menu item removed successfully!');
     }
 
@@ -205,9 +316,26 @@ class AdminController extends Controller
             'name' => 'required|string|max:100',
             'role' => 'required|string|max:100',
             'exp' => 'required|string|max:100',
-            'bio' => 'nullable|string|max:300',
-            'image' => 'nullable|string|max:255'
+            'bio' => 'nullable|string|max:500',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'instagram' => 'nullable|string|max:255',
+            'facebook' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255'
         ]);
+
+        // Handle Chef Photo Upload
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'chef_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
 
         if (empty($data['image'])) {
             $data['image'] = 'img/chefs/1.jpg';
@@ -223,7 +351,7 @@ class AdminController extends Controller
      */
     public function deleteChef($id)
     {
-        $this->dataService->deleteChef((int)$id);
+        $this->dataService->deleteChef((int) $id);
         return back()->with('success', 'Chef profile removed successfully!');
     }
 
@@ -242,7 +370,7 @@ class AdminController extends Controller
     public function updateReservationStatus(Request $request, $id)
     {
         $status = $request->input('status', 'Confirmed');
-        $this->dataService->updateReservationStatus((int)$id, $status);
+        $this->dataService->updateReservationStatus((int) $id, $status);
 
         return back()->with('success', "Reservation #{$id} marked as {$status}!");
     }
@@ -252,7 +380,7 @@ class AdminController extends Controller
      */
     public function deleteReservation($id)
     {
-        $this->dataService->deleteReservation((int)$id);
+        $this->dataService->deleteReservation((int) $id);
         return back()->with('success', 'Reservation record deleted successfully!');
     }
 
@@ -271,7 +399,7 @@ class AdminController extends Controller
     public function updateReviewStatus(Request $request, $id)
     {
         $status = $request->input('status', 'Approved');
-        $this->dataService->updateReviewStatus((int)$id, $status);
+        $this->dataService->updateReviewStatus((int) $id, $status);
 
         return back()->with('success', "Review #{$id} status updated to {$status}!");
     }
@@ -281,7 +409,7 @@ class AdminController extends Controller
      */
     public function deleteReview($id)
     {
-        $this->dataService->deleteReview((int)$id);
+        $this->dataService->deleteReview((int) $id);
         return back()->with('success', 'Customer review deleted successfully!');
     }
 
@@ -299,7 +427,7 @@ class AdminController extends Controller
      */
     public function markContactRead($id)
     {
-        $this->dataService->markContactRead((int)$id);
+        $this->dataService->markContactRead((int) $id);
         return back()->with('success', 'Message marked as read.');
     }
 
@@ -308,7 +436,7 @@ class AdminController extends Controller
      */
     public function deleteContact($id)
     {
-        $this->dataService->deleteContact((int)$id);
+        $this->dataService->deleteContact((int) $id);
         return back()->with('success', 'Contact message removed successfully!');
     }
 
@@ -362,7 +490,7 @@ class AdminController extends Controller
      */
     public function deleteGalleryItem($id)
     {
-        $this->dataService->deleteGalleryItem((int)$id);
+        $this->dataService->deleteGalleryItem((int) $id);
         return back()->with('success', 'Gallery item deleted successfully!');
     }
 }
