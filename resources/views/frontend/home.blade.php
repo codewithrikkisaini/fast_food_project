@@ -792,6 +792,25 @@
             </div>
             <div class="col-lg-8" data-aos="fade-left">
                <div class="fcard">
+                  @if(session('success'))
+                     <div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-25 text-success mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
+                  @if($errors->any())
+                     <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-25 text-danger mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Please check the following errors:</strong>
+                        <ul class="mb-0 mt-2 small">
+                           @foreach($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                           @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
                   <form action="{{ route('contact.store') }}" method="POST">
                      @csrf
                      <div class="row g-3">

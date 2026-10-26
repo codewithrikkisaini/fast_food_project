@@ -55,6 +55,26 @@
                      <h3 style="font-size:1.6rem;font-weight:700;">We'd Love to Hear From You</h3>
                      <p class="text-muted" style="font-size:0.88rem;">Fill in the form below and our manager will contact you promptly.</p>
                   </div>
+
+                  @if(session('success'))
+                     <div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-25 text-success mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
+                  @if($errors->any())
+                     <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-25 text-danger mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Please check the following errors:</strong>
+                        <ul class="mb-0 mt-2 small">
+                           @foreach($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                           @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
                   <form action="{{ route('contact.store') }}" method="POST">
                      @csrf
                      <div class="row g-3">

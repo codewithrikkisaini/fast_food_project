@@ -602,23 +602,7 @@ class RestaurantDataService
     {
         try {
             if (Schema::hasTable('reviews')) {
-                if (Review::count() === 0) {
-                    $data = $this->getAllData();
-                    foreach (array_reverse($data['reviews'] ?? []) as $rv) {
-                        Review::create([
-                            'name' => $rv['name'] ?? 'Guest Customer',
-                            'role' => $rv['role'] ?? 'Verified Diner',
-                            'rating' => (int) ($rv['rating'] ?? 5),
-                            'text' => $rv['text'] ?? '',
-                            'image' => $rv['image'] ?? 'img/testimonial/1.jpg',
-                            'status' => $rv['status'] ?? 'Approved',
-                        ]);
-                    }
-                }
-                $dbItems = Review::orderBy('id', 'desc')->get()->toArray();
-                if (!empty($dbItems)) {
-                    return $dbItems;
-                }
+                return Review::orderBy('id', 'desc')->get()->toArray();
             }
         } catch (\Throwable $e) {
         }
@@ -668,6 +652,70 @@ class RestaurantDataService
         return $newReview;
     }
 
+    public function getReviewSettings(): array
+    {
+        $data = $this->getAllData();
+        $settings = $data['review_settings'] ?? [];
+
+        return [
+            'overall_rating' => $settings['overall_rating'] ?? '4.9',
+            'rating_subtitle' => $settings['rating_subtitle'] ?? 'Overall Diner Rating (850+ Reviews)',
+            'metric1_label' => $settings['metric1_label'] ?? 'Food Quality & Freshness',
+            'metric1_percent' => (int) ($settings['metric1_percent'] ?? 98),
+            'metric2_label' => $settings['metric2_label'] ?? 'Delivery Speed (< 25 mins)',
+            'metric2_percent' => (int) ($settings['metric2_percent'] ?? 95),
+            'metric3_label' => $settings['metric3_label'] ?? 'Friendly Customer Care',
+            'metric3_percent' => (int) ($settings['metric3_percent'] ?? 99),
+        ];
+    }
+
+    public function updateReviewSettings(array $settings): void
+    {
+        $data = $this->getAllData();
+        $current = $data['review_settings'] ?? [];
+        $data['review_settings'] = array_merge($current, $settings);
+        $this->saveAllData($data);
+    }
+
+    public function updateReview(int $id, array $revData): bool
+    {
+        try {
+            if (Schema::hasTable('reviews')) {
+                $item = Review::find($id);
+                if ($item) {
+                    $item->update([
+                        'name' => $revData['name'] ?? $item->name,
+                        'role' => $revData['role'] ?? $item->role,
+                        'rating' => isset($revData['rating']) ? (int) $revData['rating'] : $item->rating,
+                        'text' => $revData['text'] ?? ($revData['message'] ?? $item->text),
+                        'image' => $revData['image'] ?? $item->image,
+                        'status' => $revData['status'] ?? $item->status,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+        }
+
+        $data = $this->getAllData();
+        $reviews = $data['reviews'] ?? [];
+        foreach ($reviews as $idx => $r) {
+            if ((int) $r['id'] === $id) {
+                $reviews[$idx] = array_merge($r, array_filter([
+                    'name' => $revData['name'] ?? null,
+                    'role' => $revData['role'] ?? null,
+                    'rating' => isset($revData['rating']) ? (int) $revData['rating'] : null,
+                    'text' => $revData['text'] ?? ($revData['message'] ?? null),
+                    'image' => $revData['image'] ?? null,
+                    'status' => $revData['status'] ?? null,
+                ], fn($val) => !is_null($val)));
+                $data['reviews'] = $reviews;
+                $this->saveAllData($data);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function updateReviewStatus(int $id, string $status): bool
     {
         try {
@@ -708,6 +756,25 @@ class RestaurantDataService
         $filtered = array_filter($reviews, fn($r) => (int) $r['id'] !== $id);
 
         $data['reviews'] = array_values($filtered);
+        $this->saveAllData($data);
+        return true;
+    }
+
+    public function deleteAllReviews(): bool
+    {
+        try {
+            if (Schema::hasTable('reviews')) {
+                Review::truncate();
+            }
+        } catch (\Throwable $e) {
+            try {
+                Review::query()->delete();
+            } catch (\Throwable $ex) {
+            }
+        }
+
+        $data = $this->getAllData();
+        $data['reviews'] = [];
         $this->saveAllData($data);
         return true;
     }
@@ -838,6 +905,88 @@ class RestaurantDataService
         return $data['blogs'] ?? [];
     }
 
+    public function getBlogPost(int $id): ?array
+    {
+        $blogs = $this->getBlogPosts();
+        foreach ($blogs as $blog) {
+            if ((int) ($blog['id'] ?? 0) === $id) {
+                return $blog;
+            }
+        }
+        return null;
+    }
+
+    public function addBlogPost(array $blogData): array
+    {
+        $data = $this->getAllData();
+        $blogs = $data['blogs'] ?? [];
+
+        $maxId = 0;
+        foreach ($blogs as $b) {
+            if ((int) ($b['id'] ?? 0) > $maxId) {
+                $maxId = (int) $b['id'];
+            }
+        }
+
+        $newBlog = [
+            'id' => $maxId + 1,
+            'title' => $blogData['title'] ?? 'New Article',
+            'category' => $blogData['category'] ?? 'Culinary Science',
+            'author' => $blogData['author'] ?? 'Executive Chef',
+            'comments' => (int) ($blogData['comments'] ?? rand(10, 30)),
+            'day' => $blogData['day'] ?? date('d'),
+            'month' => $blogData['month'] ?? date('M'),
+            'image' => $blogData['image'] ?? 'img/blog/1.jpg',
+            'excerpt' => $blogData['excerpt'] ?? '',
+            'content' => $blogData['content'] ?? '',
+        ];
+
+        array_unshift($blogs, $newBlog);
+        $data['blogs'] = $blogs;
+        $this->saveAllData($data);
+
+        return $newBlog;
+    }
+
+    public function updateBlogPost(int $id, array $blogData): bool
+    {
+        $data = $this->getAllData();
+        $blogs = $data['blogs'] ?? [];
+
+        foreach ($blogs as $idx => $b) {
+            if ((int) ($b['id'] ?? 0) === $id) {
+                $blogs[$idx] = array_merge($b, array_filter([
+                    'title' => $blogData['title'] ?? null,
+                    'category' => $blogData['category'] ?? null,
+                    'author' => $blogData['author'] ?? null,
+                    'comments' => isset($blogData['comments']) ? (int) $blogData['comments'] : null,
+                    'day' => $blogData['day'] ?? null,
+                    'month' => $blogData['month'] ?? null,
+                    'image' => $blogData['image'] ?? null,
+                    'excerpt' => $blogData['excerpt'] ?? null,
+                    'content' => $blogData['content'] ?? null,
+                ], fn($val) => !is_null($val)));
+
+                $data['blogs'] = $blogs;
+                $this->saveAllData($data);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function deleteBlogPost(int $id): bool
+    {
+        $data = $this->getAllData();
+        $blogs = $data['blogs'] ?? [];
+        $filtered = array_filter($blogs, fn($b) => (int) ($b['id'] ?? 0) !== $id);
+
+        $data['blogs'] = array_values($filtered);
+        $this->saveAllData($data);
+        return true;
+    }
+
     // ----------------------------------------------------
     // DASHBOARD STATS
     // ----------------------------------------------------
@@ -847,6 +996,7 @@ class RestaurantDataService
         $reservations = $this->getReservations();
         $contacts = $this->getContacts();
         $reviews = $this->getReviews();
+        $blogs = $this->getBlogPosts();
 
         $pendingReservations = count(array_filter($reservations, fn($r) => ($r['status'] ?? '') === 'Pending'));
         $confirmedReservations = count(array_filter($reservations, fn($r) => ($r['status'] ?? '') === 'Confirmed'));
@@ -861,6 +1011,7 @@ class RestaurantDataService
             'unread_contacts' => $unreadContacts,
             'total_reviews' => count($reviews),
             'total_chefs' => count($this->getChefs()),
+            'total_blogs' => count($blogs),
             'estimated_revenue' => '$24,850'
         ];
     }
@@ -1219,6 +1370,16 @@ class RestaurantDataService
                     'image' => 'img/portfolio/work5.jpg',
                     'category' => 'Fresh Wraps & Rolls'
                 ]
+            ],
+            'review_settings' => [
+                'overall_rating' => '4.9',
+                'rating_subtitle' => 'Overall Diner Rating (850+ Reviews)',
+                'metric1_label' => 'Food Quality & Freshness',
+                'metric1_percent' => 98,
+                'metric2_label' => 'Delivery Speed (< 25 mins)',
+                'metric2_percent' => 95,
+                'metric3_label' => 'Friendly Customer Care',
+                'metric3_percent' => 99
             ]
         ];
     }

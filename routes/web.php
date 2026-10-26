@@ -78,8 +78,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Reviews Management
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
+    Route::post('/reviews/settings', [AdminController::class, 'updateReviewSettings'])->name('reviews.settings.update');
+    Route::post('/reviews/store', [AdminController::class, 'storeReview'])->name('reviews.store');
+    Route::post('/reviews/update/{id}', [AdminController::class, 'updateReviewItem'])->name('reviews.update');
     Route::post('/reviews/status/{id}', [AdminController::class, 'updateReviewStatus'])->name('reviews.status');
     Route::post('/reviews/delete/{id}', [AdminController::class, 'deleteReview'])->name('reviews.delete');
+    Route::post('/reviews/delete-all', [AdminController::class, 'deleteAllReviews'])->name('reviews.delete.all');
+
+    // Blog Articles Management
+    Route::get('/blog', [AdminController::class, 'blog'])->name('blog');
+    Route::post('/blog/store', [AdminController::class, 'storeBlogPost'])->name('blog.store');
+    Route::post('/blog/update/{id}', [AdminController::class, 'updateBlogPost'])->name('blog.update');
+    Route::post('/blog/delete/{id}', [AdminController::class, 'deleteBlogPost'])->name('blog.delete');
 
     // Contact Inquiries Management
     Route::get('/contact', [AdminController::class, 'contact'])->name('contact');

@@ -13,6 +13,25 @@
     </span>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-25 text-success mb-4" role="alert">
+    <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
+@if($errors->any())
+<div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-25 text-danger mb-4" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i> <strong>Please correct the following errors:</strong>
+    <ul class="mb-0 mt-2 small">
+        @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <div class="admin-card">
     <div class="admin-card-header">
         <h3 class="admin-card-title"><i class="fas fa-envelope-open text-danger"></i> Inquiries Inbox</h3>

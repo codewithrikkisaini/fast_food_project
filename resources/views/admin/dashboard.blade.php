@@ -9,13 +9,19 @@
             <p class="text-secondary mb-0" style="font-size:0.9rem;">Overview of table bookings, active menu dishes, and
                 customer communications.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('admin.menu') }}" class="btn-admin-primary">
                 <i class="fas fa-plus"></i> Add Menu Item
             </a>
+            <a href="{{ route('admin.reviews') }}" class="btn btn-dark border border-secondary text-warning rounded-3 px-3">
+                <i class="fas fa-star me-1"></i> Reviews
+            </a>
+            <a href="{{ route('admin.blog') }}" class="btn btn-dark border border-secondary text-info rounded-3 px-3">
+                <i class="fas fa-newspaper me-1"></i> Blog
+            </a>
             <a href="{{ route('admin.reservations') }}"
                 class="btn btn-dark border border-secondary text-light rounded-3 px-3">
-                <i class="fas fa-calendar-alt me-1"></i> View All Bookings
+                <i class="fas fa-calendar-alt me-1"></i> Bookings
             </a>
         </div>
     </div>

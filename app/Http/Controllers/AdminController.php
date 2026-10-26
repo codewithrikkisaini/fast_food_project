@@ -389,8 +389,102 @@ class AdminController extends Controller
      */
     public function reviews()
     {
+        // One-time purge of all previous customer reviews as requested
+        $purgeMarker = storage_path('app/.reviews_purged_marker');
+        if (!file_exists($purgeMarker)) {
+            $this->dataService->deleteAllReviews();
+            @file_put_contents($purgeMarker, date('Y-m-d H:i:s'));
+        }
+
         $reviews = $this->dataService->getReviews();
-        return view('admin.reviews', compact('reviews'));
+        $reviewSettings = $this->dataService->getReviewSettings();
+        return view('admin.reviews', compact('reviews', 'reviewSettings'));
+    }
+
+    /**
+     * Update Reviews Overview Settings (Rating & Satisfaction Metrics)
+     */
+    public function updateReviewSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'overall_rating' => 'required|string|max:10',
+            'rating_subtitle' => 'required|string|max:150',
+            'metric1_label' => 'required|string|max:100',
+            'metric1_percent' => 'required|integer|min:0|max:100',
+            'metric2_label' => 'required|string|max:100',
+            'metric2_percent' => 'required|integer|min:0|max:100',
+            'metric3_label' => 'required|string|max:100',
+            'metric3_percent' => 'required|integer|min:0|max:100',
+        ]);
+
+        $this->dataService->updateReviewSettings($validated);
+        return back()->with('success', 'Reviews overview metrics and satisfaction ratings updated successfully!');
+    }
+
+    /**
+     * Store New Customer Review
+     */
+    public function storeReview(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'role' => 'nullable|string|max:100',
+            'rating' => 'required|integer|min:1|max:5',
+            'text' => 'required|string|max:1000',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'status' => 'required|string|in:Approved,Hidden',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'rev_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
+
+        if (empty($data['image'])) {
+            $data['image'] = 'img/testimonial/' . rand(1, 4) . '.jpg';
+        }
+
+        $this->dataService->addReview($data);
+        return back()->with('success', 'Customer review added successfully!');
+    }
+
+    /**
+     * Update Customer Review
+     */
+    public function updateReviewItem(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'role' => 'nullable|string|max:100',
+            'rating' => 'required|integer|min:1|max:5',
+            'text' => 'required|string|max:1000',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'status' => 'required|string|in:Approved,Hidden',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'rev_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
+
+        $this->dataService->updateReview((int) $id, $data);
+        return back()->with('success', 'Customer review #' . $id . ' updated successfully!');
     }
 
     /**
@@ -411,6 +505,15 @@ class AdminController extends Controller
     {
         $this->dataService->deleteReview((int) $id);
         return back()->with('success', 'Customer review deleted successfully!');
+    }
+
+    /**
+     * Delete All Customer Reviews
+     */
+    public function deleteAllReviews()
+    {
+        $this->dataService->deleteAllReviews();
+        return back()->with('success', 'All customer review records deleted successfully!');
     }
 
     /**
@@ -492,5 +595,102 @@ class AdminController extends Controller
     {
         $this->dataService->deleteGalleryItem((int) $id);
         return back()->with('success', 'Gallery item deleted successfully!');
+    }
+
+    /**
+     * Blog Articles Management
+     */
+    public function blog()
+    {
+        $blogs = $this->dataService->getBlogPosts();
+        return view('admin.blog', compact('blogs'));
+    }
+
+    /**
+     * Store Blog Post
+     */
+    public function storeBlogPost(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'category' => 'required|string|max:100',
+            'author' => 'required|string|max:100',
+            'day' => 'nullable|string|max:10',
+            'month' => 'nullable|string|max:15',
+            'comments' => 'nullable|integer|min:0',
+            'excerpt' => 'required|string|max:500',
+            'content' => 'required|string|max:10000',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'blog_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
+
+        if (empty($data['image'])) {
+            $data['image'] = 'img/blog/' . rand(1, 3) . '.jpg';
+        }
+
+        if (empty($data['day'])) {
+            $data['day'] = date('d');
+        }
+        if (empty($data['month'])) {
+            $data['month'] = date('M');
+        }
+
+        $this->dataService->addBlogPost($data);
+        return back()->with('success', 'New blog article published successfully!');
+    }
+
+    /**
+     * Update Blog Post
+     */
+    public function updateBlogPost(Request $request, $id)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'category' => 'required|string|max:100',
+            'author' => 'required|string|max:100',
+            'day' => 'nullable|string|max:10',
+            'month' => 'nullable|string|max:15',
+            'comments' => 'nullable|integer|min:0',
+            'excerpt' => 'required|string|max:500',
+            'content' => 'required|string|max:10000',
+            'image' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+        ]);
+
+        if ($request->hasFile('image_file')) {
+            $uploadDir = public_path('img/uploads');
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $file = $request->file('image_file');
+            $fileName = 'blog_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($uploadDir, $fileName);
+            $data['image'] = 'img/uploads/' . $fileName;
+        }
+        unset($data['image_file']);
+
+        $this->dataService->updateBlogPost((int) $id, $data);
+        return back()->with('success', 'Blog article #' . $id . ' updated successfully!');
+    }
+
+    /**
+     * Delete Blog Post
+     */
+    public function deleteBlogPost($id)
+    {
+        $this->dataService->deleteBlogPost((int) $id);
+        return back()->with('success', 'Blog article deleted successfully!');
     }
 }

@@ -662,6 +662,18 @@
                 </a>
             </div>
 
+            <!-- 5. BLOG -->
+            <div class="nav-item-admin">
+                <a href="{{ route('admin.blog') }}"
+                    class="nav-link-admin {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">
+                    <div class="nav-lead">
+                        <i class="fas fa-newspaper"></i>
+                        <span>Blog Stories</span>
+                    </div>
+                    <span class="sidebar-badge sidebar-badge-gray">{{ $sidebarStats['total_blogs'] ?? 0 }}</span>
+                </a>
+            </div>
+
             <!-- OPERATIONS & INQUIRIES -->
             <div class="sidebar-heading">OPERATIONS &amp; INQUIRIES</div>
 

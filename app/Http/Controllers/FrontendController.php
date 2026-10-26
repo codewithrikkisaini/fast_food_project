@@ -114,8 +114,9 @@ class FrontendController extends Controller
     public function reviews()
     {
         $reviews = $this->dataService->getReviews();
+        $reviewSettings = $this->dataService->getReviewSettings();
 
-        return view('frontend.reviews', compact('reviews'));
+        return view('frontend.reviews', compact('reviews', 'reviewSettings'));
     }
 
     /**
@@ -127,17 +128,18 @@ class FrontendController extends Controller
             'name' => 'required|string|max:100',
             'role' => 'nullable|string|max:100',
             'rating' => 'required|integer|min:1|max:5',
-            'message' => 'required|string|max:500'
+            'message' => 'required|string|max:1000'
         ]);
 
         $this->dataService->addReview([
             'name' => $validated['name'],
             'role' => $validated['role'] ?? 'Diner',
             'rating' => (int)$validated['rating'],
-            'text' => $validated['message']
+            'text' => $validated['message'],
+            'status' => 'Approved'
         ]);
 
-        return back()->with('success', 'Thank you for your feedback! Your review has been submitted.');
+        return back()->with('success', 'Thank you for your feedback! Your review has been submitted successfully.');
     }
 
     /**
@@ -180,10 +182,14 @@ class FrontendController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:100',
-            'phone' => 'nullable|string|max:25',
-            'subject' => 'required|string|max:150',
-            'message' => 'required|string|max:1000'
+            'phone' => 'nullable|string|max:35',
+            'subject' => 'nullable|string|max:150',
+            'message' => 'required|string|max:3000'
         ]);
+
+        if (empty($validated['subject'])) {
+            $validated['subject'] = 'General Inquiry';
+        }
 
         $this->dataService->addContact($validated);
 
