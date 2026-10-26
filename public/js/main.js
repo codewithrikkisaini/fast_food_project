@@ -6,8 +6,10 @@ AOS.init({
 
 /* NAVBAR SCROLL & ACTIVE LINK  */
 window.addEventListener('scroll', function() {
-    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-    document.getElementById('btt').classList.toggle('show', window.scrollY > 300);
+    var nav = document.getElementById('nav');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+    var btt = document.getElementById('btt');
+    if (btt) btt.classList.toggle('show', window.scrollY > 300);
     document.querySelectorAll('section[id]').forEach(function(sec) {
         var top = sec.offsetTop - 110,
             bot = top + sec.offsetHeight;
@@ -52,24 +54,33 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
 
 
 var searchOv = document.getElementById('searchOv');
+var navSearchBtn = document.getElementById('navSearchBtn');
 
-document.getElementById('navSearchBtn').addEventListener('click', function() {
-    searchOv.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    setTimeout(function() {
-        document.getElementById('searchInput').focus();
-    }, 220);
-});
+if (navSearchBtn && searchOv) {
+    navSearchBtn.addEventListener('click', function() {
+        searchOv.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        setTimeout(function() {
+            var sInp = document.getElementById('searchInput');
+            if (sInp) sInp.focus();
+        }, 220);
+    });
+}
 
-document.getElementById('searchClose').addEventListener('click', closeSearch);
+var searchClose = document.getElementById('searchClose');
+if (searchClose) {
+    searchClose.addEventListener('click', closeSearch);
+}
 
 // Close when clicking backdrop
-searchOv.addEventListener('click', function(e) {
-    if (e.target === searchOv) closeSearch();
-});
+if (searchOv) {
+    searchOv.addEventListener('click', function(e) {
+        if (e.target === searchOv) closeSearch();
+    });
+}
 
 function closeSearch() {
-    searchOv.classList.remove('open');
+    if (searchOv) searchOv.classList.remove('open');
     document.body.style.overflow = '';
 }
 
@@ -92,12 +103,81 @@ document.querySelectorAll('.sovcat').forEach(function(btn) {
     });
 });
 
-// Trending tags fill the search input
+// Real-time Dynamic Menu Search
+window.performSearch = function(query) {
+    query = (query || '').toLowerCase().trim();
+    closeSearch();
+    if (!query) return;
+
+    var menuEl = document.getElementById('menu');
+    if (!menuEl) {
+        window.location.href = '/menu?search=' + encodeURIComponent(query);
+        return;
+    }
+
+    document.querySelectorAll('.filtbtn').forEach(function(b) {
+        b.classList.remove('active');
+    });
+
+    document.querySelectorAll('.mwrap').forEach(function(w) {
+        var card = w.querySelector('.mcard');
+        if (!card) return;
+        var title = (card.getAttribute('data-title') || '').toLowerCase();
+        var desc = (card.getAttribute('data-desc') || '').toLowerCase();
+        var cat = (card.getAttribute('data-cat') || '').toLowerCase();
+        var tags = (card.getAttribute('data-tags') || '').toLowerCase();
+
+        if (title.includes(query) || desc.includes(query) || cat.includes(query) || tags.includes(query)) {
+            w.classList.remove('gone');
+            w.style.opacity = '1';
+            w.style.transform = 'translateY(0)';
+        } else {
+            w.classList.add('gone');
+        }
+    });
+
+    window.scrollTo({
+        top: menuEl.offsetTop - 80,
+        behavior: 'smooth'
+    });
+};
+
+var searchInputEl = document.getElementById('searchInput');
+if (searchInputEl) {
+    searchInputEl.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            window.performSearch(this.value);
+        }
+    });
+}
+
+var searchBtnEl = document.querySelector('#searchOv .sovinput button');
+if (searchBtnEl) {
+    searchBtnEl.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.performSearch(document.getElementById('searchInput').value);
+    });
+}
+
+// Trending tags click to search
 document.querySelectorAll('.sovtrend .ttag').forEach(function(t) {
     t.addEventListener('click', function() {
-        document.getElementById('searchInput').value = this.textContent.trim();
-        document.getElementById('searchInput').focus();
+        var term = this.textContent.trim();
+        document.getElementById('searchInput').value = term;
+        window.performSearch(term);
     });
+});
+
+// Check if search query in URL on page load
+window.addEventListener('DOMContentLoaded', function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var searchParam = urlParams.get('search');
+    if (searchParam) {
+        setTimeout(function() {
+            window.performSearch(searchParam);
+        }, 350);
+    }
 });
 
 
@@ -165,6 +245,94 @@ document.querySelectorAll('.catcard').forEach(function(card) {
 
 var menuPop = document.getElementById('menuPop');
 var mpQty = 1;
+var currentOpenedItem = null;
+
+// ==========================================
+// PERSISTENT CART SYSTEM
+// ==========================================
+window.getCart = function() {
+    try {
+        var saved = localStorage.getItem('fastfood_cart');
+        if (!saved) {
+            var initial = [
+                {
+                    title: 'Classic Smash Burger',
+                    cat: 'Burgers',
+                    img: 'img/menu/1.jpg',
+                    price: 14.99,
+                    qty: 1
+                },
+                {
+                    title: 'Margherita Royale Pizza',
+                    cat: 'Pizza',
+                    img: 'img/menu/2.jpg',
+                    price: 19.99,
+                    qty: 1
+                },
+                {
+                    title: 'Nashville Hot Crispy Chicken',
+                    cat: 'Chicken',
+                    img: 'img/menu/3.jpg',
+                    price: 12.99,
+                    qty: 1
+                }
+            ];
+            localStorage.setItem('fastfood_cart', JSON.stringify(initial));
+            return initial;
+        }
+        var cart = JSON.parse(saved);
+        return Array.isArray(cart) ? cart : [];
+    } catch(e) {
+        return [];
+    }
+};
+
+window.saveCart = function(cart) {
+    localStorage.setItem('fastfood_cart', JSON.stringify(cart));
+    window.updateCartBadge();
+    if (typeof window.renderCartPage === 'function') {
+        window.renderCartPage();
+    }
+};
+
+window.addToCart = function(item, qty) {
+    qty = parseInt(qty) || 1;
+    var cart = window.getCart();
+    var existingIndex = cart.findIndex(function(c) {
+        return c.title.toLowerCase().trim() === (item.title || '').toLowerCase().trim();
+    });
+
+    if (existingIndex > -1) {
+        cart[existingIndex].qty = (cart[existingIndex].qty || 1) + qty;
+    } else {
+        cart.push({
+            title: item.title || 'Special Dish',
+            cat: item.cat || 'Dish',
+            img: item.img || 'img/menu/1.jpg',
+            price: parseFloat(item.price) || 0,
+            qty: qty
+        });
+    }
+
+    window.saveCart(cart);
+};
+
+window.updateCartBadge = function() {
+    var cart = window.getCart();
+    var totalCount = cart.reduce(function(sum, item) {
+        return sum + (parseInt(item.qty) || 1);
+    }, 0);
+
+    var badges = document.querySelectorAll('#cartCount');
+    badges.forEach(function(b) {
+        b.textContent = totalCount;
+        b.style.transition = 'transform 0.25s ease';
+        b.style.transform = 'scale(1.35)';
+        setTimeout(function() {
+            b.style.transform = 'scale(1)';
+        }, 220);
+    });
+};
 
 function openMenuPop(card) {
     var img = card.getAttribute('data-img');
@@ -172,12 +340,21 @@ function openMenuPop(card) {
     var cat = card.getAttribute('data-cat');
     var price = card.getAttribute('data-price');
     var old = card.getAttribute('data-old');
-    var rating = parseFloat(card.getAttribute('data-rating'));
-    var reviews = card.getAttribute('data-reviews');
-    var cal = card.getAttribute('data-cal');
-    var time = card.getAttribute('data-time');
-    var desc = card.getAttribute('data-desc');
+    var rating = parseFloat(card.getAttribute('data-rating')) || 5;
+    var reviews = card.getAttribute('data-reviews') || '100';
+    var cal = card.getAttribute('data-cal') || '500';
+    var time = card.getAttribute('data-time') || '15';
+    var desc = card.getAttribute('data-desc') || '';
     var tags = card.getAttribute('data-tags') || '';
+
+    var cleanPrice = parseFloat(price.replace(/[^0-9.]/g, '')) || 0;
+    currentOpenedItem = {
+        title: title,
+        cat: cat,
+        img: img,
+        price: cleanPrice,
+        priceFormatted: price
+    };
 
     document.getElementById('mpImg').setAttribute('src', img);
     document.getElementById('mpCat').textContent = cat;
@@ -186,7 +363,7 @@ function openMenuPop(card) {
     var full = Math.round(rating),
         empty = 5 - full;
     document.getElementById('mpStars').innerHTML =
-        '<i class="fas fa-star"></i>'.repeat(full) + 'â˜†'.repeat(empty) +
+        '<i class="fas fa-star"></i>'.repeat(full) + '☆'.repeat(empty) +
         ' <span style="color:#bbb;font-size:.78rem;">' + rating + ' (' + reviews + ' reviews)</span>';
 
     document.getElementById('mpDesc').textContent = desc;
@@ -240,114 +417,159 @@ document.querySelectorAll('.mhrt').forEach(function(btn) {
 });
 
 // Close popup
-document.getElementById('mpClose').addEventListener('click', closeMenuPop);
-menuPop.addEventListener('click', function(e) {
-    if (e.target === this) closeMenuPop();
-});
+var mpClose = document.getElementById('mpClose');
+if (mpClose) mpClose.addEventListener('click', closeMenuPop);
+if (menuPop) {
+    menuPop.addEventListener('click', function(e) {
+        if (e.target === this) closeMenuPop();
+    });
+}
 
 function closeMenuPop() {
-    menuPop.classList.remove('open');
+    if (menuPop) menuPop.classList.remove('open');
     document.body.style.overflow = '';
 }
 
 // Qty +/-
-document.getElementById('mpPlus').addEventListener('click', function() {
-    document.getElementById('mpQnum').textContent = ++mpQty;
-});
-document.getElementById('mpMinus').addEventListener('click', function() {
-    if (mpQty > 1) document.getElementById('mpQnum').textContent = --mpQty;
-});
+var mpPlus = document.getElementById('mpPlus');
+if (mpPlus) {
+    mpPlus.addEventListener('click', function() {
+        var el = document.getElementById('mpQnum');
+        if (el) el.textContent = ++mpQty;
+    });
+}
+var mpMinus = document.getElementById('mpMinus');
+if (mpMinus) {
+    mpMinus.addEventListener('click', function() {
+        if (mpQty > 1) {
+            var el = document.getElementById('mpQnum');
+            if (el) el.textContent = --mpQty;
+        }
+    });
+}
 
 // Add to cart button
-document.getElementById('mpAddCart').addEventListener('click', function() {
-    var cnt = parseInt(document.getElementById('cartCount').textContent) + mpQty;
-    document.getElementById('cartCount').textContent = cnt;
-    this.innerHTML = '<i class="fas fa-check"></i> Added to Cart!';
-    this.style.background = 'linear-gradient(135deg,var(--green),#1a4a35)';
-    var self = this;
-    setTimeout(function() {
-        closeMenuPop();
-        self.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-        self.style.background = '';
-    }, 1000);
+var mpAddCart = document.getElementById('mpAddCart');
+if (mpAddCart) {
+    mpAddCart.addEventListener('click', function() {
+        if (currentOpenedItem) {
+            window.addToCart(currentOpenedItem, mpQty);
+        }
+        this.innerHTML = '<i class="fas fa-check"></i> Added to Cart!';
+        this.style.background = 'linear-gradient(135deg,var(--green),#1a4a35)';
+        var self = this;
+        setTimeout(function() {
+            closeMenuPop();
+            self.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+            self.style.background = '';
+        }, 850);
+    });
+}
+
+// Initialize cart count badge on page load
+window.addEventListener('DOMContentLoaded', function() {
+    window.updateCartBadge();
 });
 
 
-document.getElementById('resBtn').addEventListener('click', function() {
-    var btn = this;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
-    btn.disabled = true;
-    setTimeout(function() {
-        btn.innerHTML = '<i class="fas fa-calendar-check"></i> Confirm Reservation';
-        btn.disabled = false;
-        var ok = document.getElementById('resOk');
-        ok.style.display = 'block';
-        ok.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest'
-        });
-    }, 1500);
-});
 
+var resBtn = document.getElementById('resBtn');
+if (resBtn) {
+    resBtn.addEventListener('click', function() {
+        var btn = this;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
+        btn.disabled = true;
+        setTimeout(function() {
+            btn.innerHTML = '<i class="fas fa-calendar-check"></i> Confirm Reservation';
+            btn.disabled = false;
+            var ok = document.getElementById('resOk');
+            if (ok) {
+                ok.style.display = 'block';
+                ok.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }
+        }, 1500);
+    });
+}
 
-document.getElementById('ctcBtn').addEventListener('click', function() {
-    var btn = this;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    btn.disabled = true;
-    setTimeout(function() {
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-        btn.disabled = false;
-        var ok = document.getElementById('ctcOk');
-        ok.style.display = 'block';
-        ok.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest'
-        });
-    }, 1500);
-});
-
+var ctcBtn = document.getElementById('ctcBtn');
+if (ctcBtn) {
+    ctcBtn.addEventListener('click', function() {
+        var btn = this;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        btn.disabled = true;
+        setTimeout(function() {
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+            btn.disabled = false;
+            var ok = document.getElementById('ctcOk');
+            if (ok) {
+                ok.style.display = 'block';
+                ok.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest'
+                });
+            }
+        }, 1500);
+    });
+}
 
 var galPop = document.getElementById('galPop');
 var galData = [];
 var galIdx = 0;
 
-document.querySelectorAll('.gitem').forEach(function(item) {
-    galData.push({
-        img: item.getAttribute('data-gimg'),
-        title: item.getAttribute('data-gtitle'),
-        desc: item.getAttribute('data-gdesc')
+if (galPop) {
+    document.querySelectorAll('.gitem').forEach(function(item) {
+        galData.push({
+            img: item.getAttribute('data-gimg'),
+            title: item.getAttribute('data-gtitle'),
+            desc: item.getAttribute('data-gdesc')
+        });
+        item.addEventListener('click', function() {
+            openGal(parseInt(this.getAttribute('data-gi')));
+        });
     });
-    item.addEventListener('click', function() {
-        openGal(parseInt(this.getAttribute('data-gi')));
+
+    var gpClose = document.getElementById('gpClose');
+    if (gpClose) gpClose.addEventListener('click', closeGal);
+    galPop.addEventListener('click', function(e) {
+        if (e.target === this) closeGal();
     });
-});
+
+    var gpPrev = document.getElementById('gpPrev');
+    if (gpPrev) {
+        gpPrev.addEventListener('click', function() {
+            openGal((galIdx - 1 + galData.length) % galData.length);
+        });
+    }
+
+    var gpNext = document.getElementById('gpNext');
+    if (gpNext) {
+        gpNext.addEventListener('click', function() {
+            openGal((galIdx + 1) % galData.length);
+        });
+    }
+}
 
 function openGal(i) {
+    if (!galPop || !galData[i]) return;
     galIdx = i;
     var g = galData[i];
-    document.getElementById('gpImg').setAttribute('src', g.img);
-    document.getElementById('gpTitle').textContent = g.title;
-    document.getElementById('gpDesc').innerHTML = g.desc;
+    var gpImg = document.getElementById('gpImg');
+    if (gpImg) gpImg.setAttribute('src', g.img);
+    var gpTitle = document.getElementById('gpTitle');
+    if (gpTitle) gpTitle.textContent = g.title;
+    var gpDesc = document.getElementById('gpDesc');
+    if (gpDesc) gpDesc.innerHTML = g.desc;
     galPop.classList.add('open');
     document.body.style.overflow = 'hidden';
 }
 
-document.getElementById('gpClose').addEventListener('click', closeGal);
-galPop.addEventListener('click', function(e) {
-    if (e.target === this) closeGal();
-});
-
 function closeGal() {
-    galPop.classList.remove('open');
+    if (galPop) galPop.classList.remove('open');
     document.body.style.overflow = '';
 }
-
-document.getElementById('gpPrev').addEventListener('click', function() {
-    openGal((galIdx - 1 + galData.length) % galData.length);
-});
-document.getElementById('gpNext').addEventListener('click', function() {
-    openGal((galIdx + 1) % galData.length);
-});
 
 /*  ESC key closes everything */
 document.addEventListener('keydown', function(e) {
@@ -360,68 +582,77 @@ document.addEventListener('keydown', function(e) {
 });
 
 
-new Swiper('.tesSwiper', {
-    slidesPerView: 1,
-    spaceBetween: 22,
-    loop: true,
-    autoplay: {
-        delay: 4000,
-        disableOnInteraction: false
-    },
-    pagination: {
-        el: '.swiper-pagination',
-        clickable: true
-    },
-    breakpoints: {
-        640: {
-            slidesPerView: 2
+if (document.querySelector('.tesSwiper')) {
+    new Swiper('.tesSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 22,
+        loop: true,
+        autoplay: {
+            delay: 4000,
+            disableOnInteraction: false
         },
-        1024: {
-            slidesPerView: 3
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2
+            },
+            1024: {
+                slidesPerView: 3
+            }
         }
-    }
-});
+    });
+}
 
-
-var cH = 8,
-    cM = 45,
-    cS = 30;
-setInterval(function() {
-    cS--;
-    if (cS < 0) {
-        cS = 59;
-        cM--;
-    }
-    if (cM < 0) {
-        cM = 59;
-        cH--;
-    }
-    if (cH < 0) {
-        cH = 8;
-        cM = 45;
+if (document.getElementById('cdH')) {
+    var cH = 8,
+        cM = 45,
         cS = 30;
-    }
-    document.getElementById('cdH').textContent = String(cH).padStart(2, '0');
-    document.getElementById('cdM').textContent = String(cM).padStart(2, '0');
-    document.getElementById('cdS').textContent = String(cS).padStart(2, '0');
-}, 1000);
+    setInterval(function() {
+        cS--;
+        if (cS < 0) {
+            cS = 59;
+            cM--;
+        }
+        if (cM < 0) {
+            cM = 59;
+            cH--;
+        }
+        if (cH < 0) {
+            cH = 8;
+            cM = 45;
+            cS = 30;
+        }
+        var cdHEl = document.getElementById('cdH');
+        var cdMEl = document.getElementById('cdM');
+        var cdSEl = document.getElementById('cdS');
+        if (cdHEl) cdHEl.textContent = String(cH).padStart(2, '0');
+        if (cdMEl) cdMEl.textContent = String(cM).padStart(2, '0');
+        if (cdSEl) cdSEl.textContent = String(cS).padStart(2, '0');
+    }, 1000);
+}
 
-/* â”€â”€ NEWSLETTER â”€â”€ */
-document.getElementById('nlBtn').addEventListener('click', function() {
-    var email = document.getElementById('nlEmail').value;
-    if (email && email.includes('@')) {
-        var btn = this;
-        btn.textContent = 'âœ“ Subscribed!';
-        btn.style.background = '#4ade80';
-        btn.style.color = '#222';
-        document.getElementById('nlEmail').value = '';
-        setTimeout(function() {
-            btn.textContent = 'Subscribe';
-            btn.style.background = '';
-            btn.style.color = '';
-        }, 3000);
-    }
-});
+var nlBtn = document.getElementById('nlBtn');
+if (nlBtn) {
+    nlBtn.addEventListener('click', function() {
+        var nlEmailEl = document.getElementById('nlEmail');
+        var email = nlEmailEl ? nlEmailEl.value : '';
+        if (email && email.includes('@')) {
+            var btn = this;
+            btn.innerHTML = '<i class="fas fa-check"></i> Subscribed!';
+            btn.style.background = '#4ade80';
+            btn.style.color = '#222';
+            if (nlEmailEl) nlEmailEl.value = '';
+            setTimeout(function() {
+                btn.textContent = 'Subscribe';
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 3000);
+        }
+    });
+}
 
 /*  NUMBER COUNTER ANIMATION*/
 var numAnimated = false;

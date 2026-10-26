@@ -25,6 +25,7 @@ class FrontendController extends Controller
         $reviews = $this->dataService->getReviews();
         $homeSettings = $this->dataService->getHomeSettings();
         $aboutSettings = $this->dataService->getAboutSettings();
+        $galleryItems = $this->dataService->getGalleryItems();
 
         return view('frontend.home', compact(
             'menuItems',
@@ -32,7 +33,8 @@ class FrontendController extends Controller
             'blogs',
             'reviews',
             'homeSettings',
-            'aboutSettings'
+            'aboutSettings',
+            'galleryItems'
         ));
     }
 

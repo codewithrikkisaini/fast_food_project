@@ -1380,6 +1380,20 @@ class RestaurantDataService
                 'metric2_percent' => 95,
                 'metric3_label' => 'Friendly Customer Care',
                 'metric3_percent' => 99
+            ],
+            'settings' => [
+                'restaurant_name' => 'Fast Food',
+                'phone' => '+1 (800) 123-4567',
+                'email' => 'hello@fastfood.com',
+                'address' => '42 Flavor Street, Manhattan, NY 10001',
+                'hours' => 'Wed - Sun: 09 AM - 11 PM',
+                'announcement' => 'Free Delivery Today on Orders Over $25!',
+                'facebook' => 'https://facebook.com',
+                'instagram' => 'https://instagram.com',
+                'twitter' => 'https://twitter.com',
+                'youtube' => 'https://youtube.com',
+                'tiktok' => 'https://tiktok.com',
+                'footer_desc' => "We bring the world's finest flavors together in a fast, friendly, and affordable experience. Every meal crafted with love."
             ]
         ];
     }

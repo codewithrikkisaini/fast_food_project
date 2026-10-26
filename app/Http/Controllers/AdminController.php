@@ -693,4 +693,38 @@ class AdminController extends Controller
         $this->dataService->deleteBlogPost((int) $id);
         return back()->with('success', 'Blog article deleted successfully!');
     }
+
+    /**
+     * Restaurant Global Settings (Address, Phone, Email, Hours, Social Media)
+     */
+    public function settings()
+    {
+        $settings = $this->dataService->getSiteSettings();
+        return view('admin.settings', compact('settings'));
+    }
+
+    /**
+     * Update Restaurant Global Settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'restaurant_name' => 'nullable|string|max:100',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:255',
+            'hours' => 'nullable|string|max:100',
+            'announcement' => 'nullable|string|max:150',
+            'facebook' => 'nullable|string|max:255',
+            'instagram' => 'nullable|string|max:255',
+            'twitter' => 'nullable|string|max:255',
+            'youtube' => 'nullable|string|max:255',
+            'tiktok' => 'nullable|string|max:255',
+            'footer_desc' => 'nullable|string|max:1000',
+        ]);
+
+        $this->dataService->updateSiteSettings($validated);
+
+        return back()->with('success', 'Restaurant settings and contact information updated successfully!');
+    }
 }

@@ -718,6 +718,17 @@
                     </span>
                 </a>
             </div>
+
+            <!-- 8. SETTINGS -->
+            <div class="nav-item-admin">
+                <a href="{{ route('admin.settings') }}"
+                    class="nav-link-admin {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
+                    <div class="nav-lead">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- SIDEBAR FOOTER -->

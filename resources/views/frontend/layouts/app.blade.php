@@ -98,21 +98,22 @@
       <div id="topbar">
          <div class="container">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-               <div class="top-contact d-flex flex-wrap">
-                  <span><i class="fas fa-phone-alt"></i>+1 (800) 123-4567</span>
-                  <span><i class="fas fa-envelope"></i>hello@fastfood.com</span>
-                  <span><i class="fas fa-map-marker-alt"></i>42 Flavor Street, NY</span>
+                <div class="top-contact d-flex flex-wrap">
+                  <span><i class="fas fa-phone-alt"></i>{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</span>
+                  <span><i class="fas fa-envelope"></i>{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}</span>
+                  <span><i class="fas fa-map-marker-alt"></i>{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</span>
                </div>
                <div class="d-flex align-items-center gap-3">
-                  <span class="ttag"><i class="fas fa-fire me-1"></i>Free Delivery on Orders $25+</span>
+                  <span class="ttag"><i class="fas fa-fire me-1"></i>{{ $siteSettings['announcement'] ?? 'Free Delivery on Orders $25+' }}</span>
                   <a href="{{ route('admin.dashboard') }}" class="admin-quick-badge">
                      <i class="fas fa-shield-alt"></i> Foodie Admin
                   </a>
                   <div class="tsoc d-none d-sm-flex">
-                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                     <a href="#"><i class="fab fa-tiktok"></i></a>
-                     <a href="#"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['facebook'] ?? '#' }}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                     <a href="{{ $siteSettings['instagram'] ?? '#' }}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                     <a href="{{ $siteSettings['twitter'] ?? '#' }}" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                     <a href="{{ $siteSettings['youtube'] ?? '#' }}" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['tiktok'] ?? '#' }}" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>
                   </div>
                </div>
             </div>
@@ -285,14 +286,14 @@
          <div class="container">
             <div class="row g-5">
                <div class="col-lg-4">
-                  <div class="fnm">Fast<span>Food</span></div>
-                  <p class="fdesc">We bring the world's finest flavors together in a fast, friendly, and affordable experience. Every meal crafted with love.</p>
+                  <div class="fnm">{{ $siteSettings['restaurant_name'] ?? 'Fast' }}<span>Food</span></div>
+                  <p class="fdesc">{{ $siteSettings['footer_desc'] ?? "We bring the world's finest flavors together in a fast, friendly, and affordable experience. Every meal crafted with love." }}</p>
                   <div class="fsoc">
-                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                     <a href="#"><i class="fab fa-youtube"></i></a>
-                     <a href="#"><i class="fab fa-tiktok"></i></a>
+                     <a href="{{ $siteSettings['facebook'] ?? '#' }}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                     <a href="{{ $siteSettings['instagram'] ?? '#' }}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                     <a href="{{ $siteSettings['twitter'] ?? '#' }}" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                     <a href="{{ $siteSettings['youtube'] ?? '#' }}" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['tiktok'] ?? '#' }}" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>
                   </div>
                </div>
                <div class="col-sm-6 col-lg-2">
@@ -322,19 +323,19 @@
                   <div class="ftit">Get In Touch</div>
                   <div class="fci">
                      <div class="fciico"><i class="fas fa-map-marker-alt"></i></div>
-                     <div class="fciinfo"><strong>Address</strong>42 Flavor Street, Manhattan, NY 10001</div>
+                     <div class="fciinfo"><strong>Address</strong>{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</div>
                   </div>
                   <div class="fci">
                      <div class="fciico"><i class="fas fa-phone-alt"></i></div>
-                     <div class="fciinfo"><strong>Phone</strong>+1 (800) 123-4567</div>
+                     <div class="fciinfo"><strong>Phone</strong><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" class="text-white text-decoration-none">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></div>
                   </div>
                   <div class="fci">
                      <div class="fciico"><i class="fas fa-envelope"></i></div>
-                     <div class="fciinfo"><strong>Email</strong>hello@fastfood.com</div>
+                     <div class="fciinfo"><strong>Email</strong><a href="mailto:{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}" class="text-white text-decoration-none">{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}</a></div>
                   </div>
                   <div class="fci">
                      <div class="fciico"><i class="fas fa-clock"></i></div>
-                     <div class="fciinfo"><strong>Hours</strong>Wed - Sun: 09 AM - 11 PM</div>
+                     <div class="fciinfo"><strong>Hours</strong>{{ $siteSettings['hours'] ?? 'Wed - Sun: 09 AM - 11 PM' }}</div>
                   </div>
                </div>
             </div>
@@ -342,7 +343,7 @@
          <div class="fbot">
             <div class="container">
                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                  <p>&copy; {{ date('Y') }} <span>Fast Food</span>. All Rights Reserved.</p>
+                  <p>&copy; {{ date('Y') }} <span>{{ $siteSettings['restaurant_name'] ?? 'Fast Food' }}</span>. All Rights Reserved.</p>
                   <div>
                      <a href="{{ route('admin.dashboard') }}" class="text-warning me-3"><i class="fas fa-cog me-1"></i>Foodie Admin Portal</a>
                      <a href="#">Privacy Policy</a>

@@ -126,47 +126,55 @@
             <p class="sdesc mx-auto" style="max-width:480px;">From sizzling burgers to exotic world cuisines - find your
                favourite in our menu</p>
          </div>
+         @php
+            $allCount = count($menuItems);
+            $burgersCount = collect($menuItems)->where('category', 'burgers')->count();
+            $pizzaCount = collect($menuItems)->where('category', 'pizza')->count();
+            $chickenCount = collect($menuItems)->where('category', 'chicken')->count();
+            $wrapsCount = collect($menuItems)->where('category', 'wraps')->count();
+            $dessertsCount = collect($menuItems)->where('category', 'desserts')->count();
+         @endphp
          <div class="row g-3 justify-content-center">
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="0">
                <div class="catcard active" data-filter="all">
                   <img class="catimg" src="{{ asset('img/category/1.jpg') }}" alt="" />
                   <div class="catnm">All Items</div>
-                  <div class="catct">99 items</div>
+                  <div class="catct">{{ $allCount }} items</div>
                </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="70">
                <div class="catcard" data-filter="burgers">
                   <img class="catimg" src="{{ asset('img/category/2.jpg') }}" alt="" />
                   <div class="catnm">Burgers</div>
-                  <div class="catct">24 items</div>
+                  <div class="catct">{{ $burgersCount }} items</div>
                </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="140">
                <div class="catcard" data-filter="pizza">
                   <img class="catimg" src="{{ asset('img/category/3.jpg') }}" alt="" />
                   <div class="catnm">Pizza</div>
-                  <div class="catct">18 items</div>
+                  <div class="catct">{{ $pizzaCount }} items</div>
                </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="210">
                <div class="catcard" data-filter="chicken">
                   <img class="catimg" src="{{ asset('img/category/4.jpg') }}" alt="" />
                   <div class="catnm">Fried Chicken</div>
-                  <div class="catct">15 items</div>
+                  <div class="catct">{{ $chickenCount }} items</div>
                </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="280">
                <div class="catcard" data-filter="wraps">
                   <img class="catimg" src="{{ asset('img/category/5.jpg') }}" alt="" />
                   <div class="catnm">Wraps</div>
-                  <div class="catct">12 items</div>
+                  <div class="catct">{{ $wrapsCount }} items</div>
                </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="350">
                <div class="catcard" data-filter="desserts">
                   <img class="catimg" src="{{ asset('img/category/6.jpg') }}" alt="" />
                   <div class="catnm">Desserts</div>
-                  <div class="catct">20 items</div>
+                  <div class="catct">{{ $dessertsCount }} items</div>
                </div>
             </div>
          </div>
@@ -242,14 +250,21 @@
             <div class="sline"></div>
          </div>
          <!-- filter buttons -->
+         @php
+            $homeCatMap = [];
+            foreach($menuItems as $m) {
+               $c = $m['category'] ?? '';
+               $cn = $m['category_name'] ?? ucfirst($c);
+               if ($c && !isset($homeCatMap[$c])) {
+                  $homeCatMap[$c] = $cn;
+               }
+            }
+         @endphp
          <div class="text-center mb-4" data-aos="fade-up">
-            <button class="filtbtn active" data-f="all">All</button>
-            <button class="filtbtn" data-f="burgers">Burgers</button>
-            <button class="filtbtn" data-f="pizza">Pizza</button>
-            <button class="filtbtn" data-f="chicken">Chicken</button>
-            <button class="filtbtn" data-f="wraps">Wraps</button>
-            <button class="filtbtn" data-f="desserts">Desserts</button>
-            <button class="filtbtn" data-f="pasta">Pasta</button>
+            <button class="filtbtn active" data-f="all">All ({{ count($menuItems) }})</button>
+            @foreach($homeCatMap as $catSlug => $catLabel)
+               <button class="filtbtn" data-f="{{ $catSlug }}">{{ $catLabel }}</button>
+            @endforeach
          </div>
          <div class="row g-4" id="mgrid">
             @foreach($menuItems as $idx => $item)
@@ -340,34 +355,27 @@
             <div class="sline"></div>
          </div>
          <div class="ggrid" data-aos="fade-up">
-            <div class="gitem" data-gi="0" data-gimg="{{ asset('img/portfolio/work1.jpg') }}" data-gtitle="Gourmet Burgers"
-               data-gdesc="Our award-winning smash burgers, hand-crafted with 100% premium beef, aged cheddar and house-made sauces.">
-               <img src="{{ asset('img/portfolio/work1.jpg') }}" alt="Burgers" />
-               <div class="gover"><span><i class="fas fa-expand-alt"></i> Gourmet Burgers</span></div>
-            </div>
-            <div class="gitem" data-gi="1" data-gimg="{{ asset('img/portfolio/work2.jpg') }}"
-               data-gtitle="Wood-Fired Pizza"
-               data-gdesc="Authentic Neapolitan-style pizzas fired at 900deg F in our wood-burning stone oven for the perfect char.">
-               <img src="{{ asset('img/portfolio/work2.jpg') }}" alt="Pizza" />
-               <div class="gover"><span><i class="fas fa-expand-alt"></i> Wood-Fired Pizza</span></div>
-            </div>
-            <div class="gitem" data-gi="2" data-gimg="{{ asset('img/portfolio/work3.jpg') }}"
-               data-gtitle="Crispy Fried Chicken"
-               data-gdesc="Double-brined, hand-battered chicken fried to golden perfection using our 15-spice secret blend.">
-               <img src="{{ asset('img/portfolio/work3.jpg') }}" alt="Chicken" />
-               <div class="gover"><span><i class="fas fa-expand-alt"></i> Crispy Fried Chicken</span></div>
-            </div>
-            <div class="gitem" data-gi="3" data-gimg="{{ asset('img/portfolio/work4.jpg') }}" data-gtitle="Sweet Desserts"
-               data-gdesc="Handcrafted desserts - from molten lava cakes to artisan ice cream sundaes and seasonal pastries.">
-               <img src="{{ asset('img/portfolio/work4.jpg') }}" alt="Desserts" />
-               <div class="gover"><span><i class="fas fa-expand-alt"></i> Sweet Desserts</span></div>
-            </div>
-            <div class="gitem" data-gi="4" data-gimg="{{ asset('img/portfolio/work5.jpg') }}"
-               data-gtitle="Fresh Wraps &amp; Rolls"
-               data-gdesc="Loaded fresh wraps packed with grilled proteins, crunchy vegetables and our house-made sauces.">
-               <img src="{{ asset('img/portfolio/work5.jpg') }}" alt="Wraps" />
-               <div class="gover"><span><i class="fas fa-expand-alt"></i> Fresh Wraps &amp; Rolls</span></div>
-            </div>
+            @if(!empty($galleryItems) && count($galleryItems) > 0)
+               @foreach($galleryItems as $index => $item)
+                  <div class="gitem" data-gi="{{ $index }}" data-gimg="{{ asset($item['image']) }}" data-gtitle="{{ $item['title'] }}"
+                     data-gdesc="{{ $item['desc'] }}">
+                     <img src="{{ asset($item['image']) }}" alt="{{ $item['title'] }}" />
+                     <div class="gover"><span><i class="fas fa-expand-alt"></i> {{ $item['category'] ?? $item['title'] }}</span></div>
+                  </div>
+               @endforeach
+            @else
+               <div class="gitem" data-gi="0" data-gimg="{{ asset('img/portfolio/work1.jpg') }}" data-gtitle="Gourmet Burgers"
+                  data-gdesc="Our award-winning smash burgers, hand-crafted with 100% premium beef, aged cheddar and house-made sauces.">
+                  <img src="{{ asset('img/portfolio/work1.jpg') }}" alt="Burgers" />
+                  <div class="gover"><span><i class="fas fa-expand-alt"></i> Gourmet Burgers</span></div>
+               </div>
+               <div class="gitem" data-gi="1" data-gimg="{{ asset('img/portfolio/work2.jpg') }}"
+                  data-gtitle="Wood-Fired Pizza"
+                  data-gdesc="Authentic Neapolitan-style pizzas fired at 900deg F in our wood-burning stone oven for the perfect char.">
+                  <img src="{{ asset('img/portfolio/work2.jpg') }}" alt="Pizza" />
+                  <div class="gover"><span><i class="fas fa-expand-alt"></i> Wood-Fired Pizza</span></div>
+               </div>
+            @endif
          </div>
       </div>
    </section>
@@ -496,6 +504,12 @@
          <div class="row g-4 align-items-start">
             <div class="col-lg-5" data-aos="fade-right">
                <div class="hrscard">
+                  @if(!empty($siteSettings['hours']))
+                     <div class="p-3 mb-3 rounded-3 text-center" style="background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.25);">
+                        <small class="text-uppercase tracking-wider d-block mb-1" style="color:var(--secondary);font-size:0.75rem;font-weight:600;"><i class="fas fa-clock me-1"></i>Current Working Schedule</small>
+                        <strong class="text-white" style="font-size:1.05rem;">{{ $siteSettings['hours'] }}</strong>
+                     </div>
+                  @endif
                   <div class="hrsrow">
                      <span class="hrsday"><i class="fas fa-calendar-day me-2" style="color:var(--secondary);"></i>Monday -
                         Tuesday</span>
@@ -553,13 +567,13 @@
                      <i class="fas fa-map-marker-alt me-2" style="color:var(--secondary);"></i>Find Us</h5>
                   <div class="hrsrow"><span class="hrsday"><i class="fas fa-location-dot me-2"
                            style="color:var(--secondary);"></i>Address</span><span class="hrstime"
-                        style="font-size:.8rem;">42 Flavor Street, NY</span></div>
+                        style="font-size:.8rem;">{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</span></div>
                   <div class="hrsrow"><span class="hrsday"><i class="fas fa-phone me-2"
                            style="color:var(--secondary);"></i>Phone</span><span class="hrstime"
-                        style="font-size:.8rem;">+1 (800) 123-4567</span></div>
+                        style="font-size:.8rem;"><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></span></div>
                   <div class="hrsrow"><span class="hrsday"><i class="fas fa-envelope me-2"
                            style="color:var(--secondary);"></i>Email</span><span class="hrstime"
-                        style="font-size:.8rem;">hello@fastfood.com</span></div>
+                        style="font-size:.8rem;"><a href="mailto:{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}</a></span></div>
                </div>
             </div>
          </div>
@@ -619,11 +633,11 @@
                      <div class="d-flex flex-column gap-3">
                         <div class="d-flex align-items-center gap-3">
                            <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-clock"></i></div>
-                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Opening Hours</strong><span style="color:#fff;font-size:.87rem;">Wed - Sun, 9 AM - 11 PM</span></div>
+                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Opening Hours</strong><span style="color:#fff;font-size:.87rem;">{{ $siteSettings['hours'] ?? 'Wed - Sun: 09 AM - 11 PM' }}</span></div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
                            <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-phone-alt"></i></div>
-                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Call for Booking</strong><span style="color:#fff;font-size:.87rem;">+1 (800) 123-4567</span></div>
+                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Call for Booking</strong><span style="color:#fff;font-size:.87rem;"><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></span></div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
                            <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-users"></i></div>
@@ -631,7 +645,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-3">
                            <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-map-marker-alt"></i></div>
-                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Location</strong><span style="color:#fff;font-size:.87rem;">42 Flavor Street, NY</span></div>
+                           <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Location</strong><span style="color:#fff;font-size:.87rem;">{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</span></div>
                         </div>
                      </div>
                   </div>
@@ -768,25 +782,26 @@
                   <p class="ctsub">We typically respond within 2 hours during business hours.</p>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-map-marker-alt"></i></div>
-                     <div class="ctinfo"><strong>Address</strong>42 Flavor Street, Manhattan,<br />New York, NY 10001</div>
+                     <div class="ctinfo"><strong>Address</strong>{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-phone-alt"></i></div>
-                     <div class="ctinfo"><strong>Phone</strong>+1 (800) 123-4567</div>
+                     <div class="ctinfo"><strong>Phone</strong><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-envelope"></i></div>
-                     <div class="ctinfo"><strong>Email</strong>hello@fastfood.com</div>
+                     <div class="ctinfo"><strong>Email</strong><a href="mailto:{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}</a></div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-clock"></i></div>
-                     <div class="ctinfo"><strong>Working Hours</strong>Wed - Sun: 9 AM - 11 PM</div>
+                     <div class="ctinfo"><strong>Working Hours</strong>{{ $siteSettings['hours'] ?? 'Wed - Sun: 09 AM - 11 PM' }}</div>
                   </div>
                   <div class="ctsocrow">
-                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                     <a href="#"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['facebook'] ?? '#' }}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                     <a href="{{ $siteSettings['instagram'] ?? '#' }}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                     <a href="{{ $siteSettings['twitter'] ?? '#' }}" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                     <a href="{{ $siteSettings['youtube'] ?? '#' }}" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['tiktok'] ?? '#' }}" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>
                   </div>
                </div>
             </div>

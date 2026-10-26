@@ -31,9 +31,9 @@
                      <div class="chimg">
                         <img src="{{ asset($chef['image']) }}" alt="{{ $chef['name'] }}"/>
                         <div class="chsoc">
-                           <a href="#"><i class="fab fa-instagram"></i></a>
-                           <a href="#"><i class="fab fa-facebook-f"></i></a>
-                           <a href="#"><i class="fab fa-twitter"></i></a>
+                           <a href="{{ !empty($chef['instagram']) ? $chef['instagram'] : '#' }}" target="{{ !empty($chef['instagram']) ? '_blank' : '_self' }}"><i class="fab fa-instagram"></i></a>
+                           <a href="{{ !empty($chef['facebook']) ? $chef['facebook'] : '#' }}" target="{{ !empty($chef['facebook']) ? '_blank' : '_self' }}"><i class="fab fa-facebook-f"></i></a>
+                           <a href="{{ !empty($chef['twitter']) ? $chef['twitter'] : '#' }}" target="{{ !empty($chef['twitter']) ? '_blank' : '_self' }}"><i class="fab fa-twitter"></i></a>
                         </div>
                      </div>
                      <div class="chbody">

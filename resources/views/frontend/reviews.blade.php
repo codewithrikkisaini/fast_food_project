@@ -145,6 +145,111 @@
             @endforelse
          </div>
 
+         <!-- SUBMIT A REVIEW FORM -->
+         <div class="row justify-content-center mt-5" id="submit-review">
+            <div class="col-lg-8">
+               <div class="review-submit-card">
+                  <div class="text-center mb-4">
+                     <span class="badge bg-warning text-dark px-3 py-2 fw-semibold mb-2">Share Your Experience</span>
+                     <h3 class="fw-bold" style="font-family:'Playfair Display',serif;">Leave a Customer Review</h3>
+                     <p class="text-muted small">Your feedback helps us continuously elevate our food quality and diner hospitality.</p>
+                  </div>
+
+                  @if(session('success'))
+                     <div class="alert alert-success alert-dismissible fade show border-0 bg-success bg-opacity-25 text-success mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
+                  @if($errors->any())
+                     <div class="alert alert-danger alert-dismissible fade show border-0 bg-danger bg-opacity-25 text-danger mb-4" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <strong>Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-2 small">
+                           @foreach($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                           @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                     </div>
+                  @endif
+
+                  <form action="{{ route('reviews.store') }}" method="POST">
+                     @csrf
+                     <div class="row g-3">
+                        <div class="col-sm-6">
+                           <label class="form-label small fw-bold text-muted">Your Name *</label>
+                           <input type="text" name="name" class="form-control" placeholder="e.g. Sarah Jenkins" value="{{ old('name') }}" required>
+                        </div>
+                        <div class="col-sm-6">
+                           <label class="form-label small fw-bold text-muted">Customer Title / Role</label>
+                           <input type="text" name="role" class="form-control" placeholder="e.g. Verified Diner, Foodie" value="{{ old('role', 'Verified Diner') }}">
+                        </div>
+                        <div class="col-12">
+                           <label class="form-label small fw-bold text-muted">Your Rating *</label>
+                           <div class="review-star-picker" id="starPicker">
+                              <input type="hidden" name="rating" id="ratingInput" value="{{ old('rating', 5) }}">
+                              <span class="small fw-semibold text-muted me-2">Select Stars:</span>
+                              <i class="fas fa-star active" data-rating="1"></i>
+                              <i class="fas fa-star active" data-rating="2"></i>
+                              <i class="fas fa-star active" data-rating="3"></i>
+                              <i class="fas fa-star active" data-rating="4"></i>
+                              <i class="fas fa-star active" data-rating="5"></i>
+                              <span class="ms-2 fw-bold text-warning" id="ratingLabel">5 / 5 - Exceptional</span>
+                           </div>
+                        </div>
+                        <div class="col-12">
+                           <label class="form-label small fw-bold text-muted">Your Review &amp; Experience *</label>
+                           <textarea name="message" class="form-control" rows="4" placeholder="Tell us what you loved about our dishes, taste, speed, or service..." required>{{ old('message') }}</textarea>
+                        </div>
+                        <div class="col-12 text-center mt-3">
+                           <button type="submit" class="btn-red px-5 py-3">
+                              <i class="fas fa-paper-plane me-2"></i>Submit Customer Review
+                           </button>
+                        </div>
+                     </div>
+                  </form>
+               </div>
+            </div>
+         </div>
+
        </div>
    </section>
 @endsection
+
+@push('scripts')
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      const starPicker = document.getElementById('starPicker');
+      if (!starPicker) return;
+      const stars = starPicker.querySelectorAll('i[data-rating]');
+      const ratingInput = document.getElementById('ratingInput');
+      const ratingLabel = document.getElementById('ratingLabel');
+
+      const labels = {
+         1: '1 / 5 - Poor',
+         2: '2 / 5 - Fair',
+         3: '3 / 5 - Good',
+         4: '4 / 5 - Very Good',
+         5: '5 / 5 - Exceptional'
+      };
+
+      stars.forEach(star => {
+         star.addEventListener('click', function () {
+            const val = parseInt(this.getAttribute('data-rating'));
+            ratingInput.value = val;
+            ratingLabel.textContent = labels[val] || (val + ' / 5');
+
+            stars.forEach(s => {
+               const sVal = parseInt(s.getAttribute('data-rating'));
+               if (sVal <= val) {
+                  s.classList.add('active');
+               } else {
+                  s.classList.remove('active');
+               }
+            });
+         });
+      });
+   });
+</script>
+@endpush

@@ -26,25 +26,26 @@
                   <p class="ctsub">We typically respond within 2 hours during normal business hours.</p>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-map-marker-alt"></i></div>
-                     <div class="ctinfo"><strong>Address</strong>42 Flavor Street, Manhattan,<br/>New York, NY 10001</div>
+                     <div class="ctinfo"><strong>Address</strong>{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-phone-alt"></i></div>
-                     <div class="ctinfo"><strong>Phone</strong>+1 (800) 123-4567</div>
+                     <div class="ctinfo"><strong>Phone</strong><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-envelope"></i></div>
-                     <div class="ctinfo"><strong>Email</strong>hello@fastfood.com</div>
+                     <div class="ctinfo"><strong>Email</strong><a href="mailto:{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['email'] ?? 'hello@fastfood.com' }}</a></div>
                   </div>
                   <div class="ctitem">
                      <div class="cticon"><i class="fas fa-clock"></i></div>
-                     <div class="ctinfo"><strong>Working Hours</strong>Wed - Sun: 9 AM - 11 PM</div>
+                     <div class="ctinfo"><strong>Working Hours</strong>{{ $siteSettings['hours'] ?? 'Wed - Sun: 09 AM - 11 PM' }}</div>
                   </div>
                   <div class="ctsocrow">
-                     <a href="#"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#"><i class="fab fa-instagram"></i></a>
-                     <a href="#"><i class="fab fa-twitter"></i></a>
-                     <a href="#"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['facebook'] ?? '#' }}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                     <a href="{{ $siteSettings['instagram'] ?? '#' }}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                     <a href="{{ $siteSettings['twitter'] ?? '#' }}" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                     <a href="{{ $siteSettings['youtube'] ?? '#' }}" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+                     <a href="{{ $siteSettings['tiktok'] ?? '#' }}" target="_blank" title="TikTok"><i class="fab fa-tiktok"></i></a>
                   </div>
                </div>
             </div>

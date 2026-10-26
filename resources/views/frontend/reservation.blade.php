@@ -27,11 +27,11 @@
                   <div class="d-flex flex-column gap-3">
                      <div class="d-flex align-items-center gap-3">
                         <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-clock"></i></div>
-                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Opening Hours</strong><span style="color:#fff;font-size:.87rem;">Wed - Sun, 9 AM - 11 PM</span></div>
+                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Opening Hours</strong><span style="color:#fff;font-size:.87rem;">{{ $siteSettings['hours'] ?? 'Wed - Sun: 09 AM - 11 PM' }}</span></div>
                      </div>
                      <div class="d-flex align-items-center gap-3">
                         <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-phone-alt"></i></div>
-                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">VIP Concierge</strong><span style="color:#fff;font-size:.87rem;">+1 (800) 123-4567</span></div>
+                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">VIP Concierge</strong><span style="color:#fff;font-size:.87rem;"><a href="tel:{{ $siteSettings['phone'] ?? '+18001234567' }}" style="color:inherit;text-decoration:none;">{{ $siteSettings['phone'] ?? '+1 (800) 123-4567' }}</a></span></div>
                      </div>
                      <div class="d-flex align-items-center gap-3">
                         <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-users"></i></div>
@@ -39,7 +39,7 @@
                      </div>
                      <div class="d-flex align-items-center gap-3">
                         <div style="width:46px;height:46px;border-radius:11px;background:rgba(232,40,26,.2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-map-marker-alt"></i></div>
-                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Location</strong><span style="color:#fff;font-size:.87rem;">42 Flavor Street, NY</span></div>
+                        <div><strong style="display:block;color:#ccc;font-size:.78rem;text-transform:uppercase;letter-spacing:.8px;">Location</strong><span style="color:#fff;font-size:.87rem;">{{ $siteSettings['address'] ?? '42 Flavor Street, Manhattan, NY 10001' }}</span></div>
                      </div>
                   </div>
                </div>

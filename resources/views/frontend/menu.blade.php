@@ -25,14 +25,21 @@
             <div class="sline"></div>
          </div>
          <!-- filter buttons -->
+         @php
+            $catMap = [];
+            foreach($menuItems as $m) {
+               $c = $m['category'] ?? '';
+               $cn = $m['category_name'] ?? ucfirst($c);
+               if ($c && !isset($catMap[$c])) {
+                  $catMap[$c] = $cn;
+               }
+            }
+         @endphp
          <div class="text-center mb-5" data-aos="fade-up">
-            <button class="filtbtn active" data-f="all">All Items</button>
-            <button class="filtbtn" data-f="burgers">Burgers</button>
-            <button class="filtbtn" data-f="pizza">Pizza</button>
-            <button class="filtbtn" data-f="chicken">Chicken</button>
-            <button class="filtbtn" data-f="wraps">Wraps</button>
-            <button class="filtbtn" data-f="desserts">Desserts</button>
-            <button class="filtbtn" data-f="pasta">Pasta</button>
+            <button class="filtbtn active" data-f="all">All Items ({{ count($menuItems) }})</button>
+            @foreach($catMap as $catSlug => $catLabel)
+               <button class="filtbtn" data-f="{{ $catSlug }}">{{ $catLabel }}</button>
+            @endforeach
          </div>
 
          <div class="row g-4" id="mgrid">
