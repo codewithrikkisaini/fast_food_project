@@ -9,39 +9,38 @@ class BlogController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Blog List Page (Route: /blog)
+     * Display public blog articles list (Route: /blog).
      */
     public function index()
     {
-        // Step 1: Saare blog posts service se lena
+        // Step 1: Retrieve all published articles
         $blogs = $this->dataService->getBlogPosts();
 
-        // Step 2: Blog list view me bhejna
+        // Step 2: Render blog list view with data
         return view('frontend.blog', compact('blogs'));
     }
 
     /**
-     * Single Blog Detail Page (Route: /blog/{id})
+     * Display single blog article detail (Route: /blog/{id}).
      */
     public function show($id)
     {
-        // Step 1: Saare blog posts lena
+        // Step 1: Retrieve all blog articles
         $blogs = $this->dataService->getBlogPosts();
 
-        // Step 2: URL ki ID ke hisab se specific blog post find karna
+        // Step 2: Find target article by ID with fallback
         $post = collect($blogs)->firstWhere('id', (int) $id) ?? ($blogs[0] ?? []);
 
-        // Step 3: Sidebar me dikhane ke liye recent posts lena
+        // Step 3: Retrieve recent sidebar articles
         $recentPosts = collect($blogs)->where('id', '!=', $post['id'] ?? 0)->values();
 
-        // Step 4: Blog detail blade view me data bhejna
+        // Step 4: Render blog detail blade view
         return view('frontend.blog-detail', compact('post', 'recentPosts'));
     }
 }

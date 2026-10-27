@@ -9,22 +9,21 @@ class MenuController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Public Menu Page (Route: /menu)
+     * Display public Menu page (Route: /menu).
      */
     public function index()
     {
-        // Step 1: Saare food menu items aur settings lena
+        // Step 1: Retrieve all menu items and site settings
         $menuItems    = $this->dataService->getMenuItems();
         $homeSettings = $this->dataService->getHomeSettings();
 
-        // Step 2: Menu blade view me data bhejna
+        // Step 2: Render menu blade view with data
         return view('frontend.menu', compact('menuItems', 'homeSettings'));
     }
 }

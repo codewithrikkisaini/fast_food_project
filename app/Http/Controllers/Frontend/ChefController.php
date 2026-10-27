@@ -9,21 +9,20 @@ class ChefController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Public Chefs Team Page (Route: /chefs)
+     * Display public culinary team page (Route: /chefs).
      */
     public function index()
     {
-        // Step 1: Saare chefs ka data service se lena
+        // Step 1: Retrieve chef team profiles from service
         $chefs = $this->dataService->getChefs();
 
-        // Step 2: Chefs blade view me data bhejna
+        // Step 2: Render chefs blade view with data
         return view('frontend.chefs', compact('chefs'));
     }
 }

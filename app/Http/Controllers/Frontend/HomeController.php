@@ -9,18 +9,17 @@ class HomeController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Public Home Page (Route: /)
+     * Display public landing page (Route: /).
      */
     public function index()
     {
-        // Step 1: Homepage par display hone wala data service se lena
+        // Step 1: Retrieve all homepage showcases and settings
         $menuItems     = $this->dataService->getMenuItems();
         $chefs         = $this->dataService->getChefs();
         $blogs         = $this->dataService->getBlogPosts();
@@ -29,7 +28,7 @@ class HomeController extends Controller
         $aboutSettings = $this->dataService->getAboutSettings();
         $galleryItems  = $this->dataService->getGalleryItems();
 
-        // Step 2: Homepage blade view me saara data pass karna
+        // Step 2: Render home blade view with data
         return view('frontend.home', compact(
             'menuItems',
             'chefs',

@@ -9,28 +9,27 @@ class DashboardController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Admin Dashboard Page - Summary statistics aur latest activity
+     * Display the Admin Dashboard metrics and activity feeds.
      */
     public function index()
     {
-        // Step 1: Total stats lena (reservations count, menu count, etc.)
+        // Step 1: Retrieve high-level statistics
         $stats = $this->dataService->getStats();
 
-        // Step 2: Recent 6 reservations aur recent 5 contact messages lena
+        // Step 2: Retrieve recent reservations and contact inquiries
         $recentReservations = array_slice($this->dataService->getReservations(), 0, 6);
         $recentContacts     = array_slice($this->dataService->getContacts(), 0, 5);
 
-        // Step 3: Top menu items lena
+        // Step 3: Retrieve top menu items
         $menuItems = $this->dataService->getMenuItems();
 
-        // Step 4: Dashboard view me saara data pass karna
+        // Step 4: Render dashboard view with data
         return view('admin.dashboard', compact('stats', 'recentReservations', 'recentContacts', 'menuItems'));
     }
 }

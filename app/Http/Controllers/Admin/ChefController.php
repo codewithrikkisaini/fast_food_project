@@ -10,40 +10,38 @@ class ChefController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Chefs Page - Sabhi chefs ki list dekhne ke liye
+     * Display all chef team profiles.
      */
     public function index()
     {
-        // Step 1: Saare chefs ka data lena
+        // Step 1: Retrieve all chef profiles from service
         $chefs = $this->dataService->getChefs();
 
-        // Step 2: Blade view me data bhejna
+        // Step 2: Render admin chefs view
         return view('admin.chefs', compact('chefs'));
     }
 
     /**
-     * Chef ko add ya update karne ke liye
+     * Create or update a chef profile.
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation - zaroori fields check karna
+        // Step 1: Validate required chef information
         $request->validate([
             'name' => 'required|string',
             'role' => 'required|string',
             'exp'  => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Chef ki photo upload karna
+        // Step 2: Upload chef photo if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'chef_' . time() . '.' . $file->extension();
@@ -51,26 +49,25 @@ class ChefController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Agar koi photo nahi hai to default photo lagana
+        // Apply default placeholder image if none exists
         if (empty($data['image'])) {
             $data['image'] = 'img/chefs/1.jpg';
         }
 
-        // Step 3: Data save karna
+        // Step 3: Save chef profile via service
         $this->dataService->saveChef($data);
 
-        // Step 4: Success message ke sath wapas bhej dena
-        return back()->with('success', 'Chef profile successfully save ho gayi!');
+        // Step 4: Redirect back with success status
+        return back()->with('success', 'Chef profile saved successfully!');
     }
 
     /**
-     * Chef ko delete karne ke liye
+     * Delete a chef profile by ID.
      */
     public function destroy($id)
     {
-        // ID ke hisab se chef delete karna
         $this->dataService->deleteChef((int) $id);
 
-        return back()->with('success', 'Chef profile delete ho gayi!');
+        return back()->with('success', 'Chef profile removed successfully!');
     }
 }

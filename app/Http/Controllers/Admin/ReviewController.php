@@ -10,31 +10,30 @@ class ReviewController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Reviews Page - Customer reviews aur rating settings dekhna
+     * Display all customer reviews and overview metrics.
      */
     public function index()
     {
-        // Step 1: Saare reviews aur settings data lena
+        // Step 1: Retrieve reviews and rating settings
         $reviews = $this->dataService->getReviews();
         $reviewSettings = $this->dataService->getReviewSettings();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render admin reviews view
         return view('admin.reviews', compact('reviews', 'reviewSettings'));
     }
 
     /**
-     * Review Overview Settings (Overall Rating, Percentages) update karna
+     * Update rating overview settings and percentages.
      */
     public function updateSettings(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate metric inputs
         $validated = $request->validate([
             'overall_rating'  => 'required|string',
             'rating_subtitle' => 'required|string',
@@ -46,18 +45,18 @@ class ReviewController extends Controller
             'metric3_percent' => 'required|integer',
         ]);
 
-        // Step 2: Settings save karna
+        // Step 2: Save updated metrics
         $this->dataService->updateReviewSettings($validated);
 
-        return back()->with('success', 'Reviews settings successfully update ho gayi!');
+        return back()->with('success', 'Reviews settings updated successfully!');
     }
 
     /**
-     * Naya Customer Review Add karna
+     * Add a new customer review record.
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate review data
         $request->validate([
             'name'   => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
@@ -65,10 +64,9 @@ class ReviewController extends Controller
             'status' => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Customer photo upload karna
+        // Step 2: Upload customer photo if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'rev_' . time() . '.' . $file->extension();
@@ -76,23 +74,23 @@ class ReviewController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Default avatar image agar photo na ho
+        // Apply default customer avatar if empty
         if (empty($data['image'])) {
             $data['image'] = 'img/testimonial/1.jpg';
         }
 
-        // Step 3: Review save karna
+        // Step 3: Save review via service
         $this->dataService->addReview($data);
 
-        return back()->with('success', 'Customer review successfully add ho gaya!');
+        return back()->with('success', 'Customer review added successfully!');
     }
 
     /**
-     * Existing Customer Review Update karna
+     * Update an existing customer review.
      */
     public function update(Request $request, $id)
     {
-        // Step 1: Form validation
+        // Step 1: Validate review update inputs
         $request->validate([
             'name'   => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
@@ -102,7 +100,7 @@ class ReviewController extends Controller
 
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Photo upload agar nayi photo select ki gayi ho
+        // Step 2: Handle optional new image upload
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'rev_' . time() . '.' . $file->extension();
@@ -110,38 +108,40 @@ class ReviewController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 3: Review update karna
+        // Step 3: Save review modifications
         $this->dataService->updateReview((int) $id, $data);
 
-        return back()->with('success', 'Review #' . $id . ' successfully update ho gaya!');
+        return back()->with('success', 'Review #' . $id . ' updated successfully!');
     }
 
     /**
-     * Review Status Update karna (Approved ya Hidden)
+     * Update visibility status of a review (Approved or Hidden).
      */
     public function updateStatus(Request $request, $id)
     {
         $status = $request->input('status', 'Approved');
         $this->dataService->updateReviewStatus((int) $id, $status);
 
-        return back()->with('success', "Review #{$id} ka status {$status} ho gaya!");
+        return back()->with('success', "Review #{$id} status updated to {$status}!");
     }
 
     /**
-     * Single Review Delete karna
+     * Delete a single review record.
      */
     public function destroy($id)
     {
         $this->dataService->deleteReview((int) $id);
-        return back()->with('success', 'Review record delete ho gaya!');
+
+        return back()->with('success', 'Review deleted successfully!');
     }
 
     /**
-     * Saare Reviews Delete karna
+     * Remove all customer reviews.
      */
     public function destroyAll()
     {
         $this->dataService->deleteAllReviews();
-        return back()->with('success', 'Sabhi reviews delete ho gaye!');
+
+        return back()->with('success', 'All customer reviews cleared successfully!');
     }
 }

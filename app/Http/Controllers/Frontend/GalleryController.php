@@ -9,21 +9,20 @@ class GalleryController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Public Gallery Showcase Page (Route: /gallery)
+     * Display public gallery showcase page (Route: /gallery).
      */
     public function index()
     {
-        // Step 1: Saari gallery photos service se lena
+        // Step 1: Retrieve gallery showcase images from service
         $galleryItems = $this->dataService->getGalleryItems();
 
-        // Step 2: Gallery blade view me bhejna
+        // Step 2: Render gallery blade view with data
         return view('frontend.gallery', compact('galleryItems'));
     }
 }

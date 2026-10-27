@@ -9,43 +9,40 @@ class ContactController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Contact Messages Page - Sabhi visitor messages dekhna
+     * Display all visitor contact inquiries.
      */
     public function index()
     {
-        // Step 1: Saare contact messages lena
+        // Step 1: Retrieve all contact submissions
         $contacts = $this->dataService->getContacts();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render admin contact inquiries view
         return view('admin.contact', compact('contacts'));
     }
 
     /**
-     * Message ko Read mark karna
+     * Mark an inquiry message as read.
      */
     public function markRead($id)
     {
-        // ID ke basis par message ko 'read' mark karna
         $this->dataService->markContactRead((int) $id);
 
         return back()->with('success', 'Message marked as read.');
     }
 
     /**
-     * Message ko Delete karna
+     * Remove an inquiry message by ID.
      */
     public function destroy($id)
     {
-        // ID ke basis par contact message delete karna
         $this->dataService->deleteContact((int) $id);
 
-        return back()->with('success', 'Contact message delete ho gaya!');
+        return back()->with('success', 'Contact message removed successfully!');
     }
 }

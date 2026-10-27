@@ -10,30 +10,29 @@ class ContactController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Contact Us Page (Route: /contact)
+     * Display public contact page (Route: /contact).
      */
     public function index()
     {
-        // Step 1: Restaurant settings lena (phone, email, address etc.)
+        // Step 1: Retrieve contact details from settings
         $homeSettings = $this->dataService->getHomeSettings();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render contact blade view with data
         return view('frontend.contact', compact('homeSettings'));
     }
 
     /**
-     * Visitor ka Contact Message Submit karna (Route: POST /contact)
+     * Process visitor contact inquiry submission (Route: POST /contact).
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate contact form fields
         $validated = $request->validate([
             'name'    => 'required|string',
             'email'   => 'required|email',
@@ -42,15 +41,14 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        // Default subject agar user ne na diya ho
         if (empty($validated['subject'])) {
             $validated['subject'] = 'General Inquiry';
         }
 
-        // Step 2: Contact message save karna
+        // Step 2: Save inquiry message via service
         $this->dataService->addContact($validated);
 
-        // Step 3: Success message ke sath wapas redirect karna
-        return back()->with('success', 'Thank you! Aapka message successfully receive ho gaya hai.');
+        // Step 3: Redirect back with success status
+        return back()->with('success', 'Thank you for reaching out! Your message has been received.');
     }
 }

@@ -10,30 +10,29 @@ class MenuController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Menu Page - Saare menu items dekhne ke liye
+     * Display all restaurant menu items.
      */
     public function index()
     {
-        // Step 1: Saare menu items lena
+        // Step 1: Retrieve all menu items from data service
         $menuItems = $this->dataService->getMenuItems();
 
-        // Step 2: Blade view me data bhejna
+        // Step 2: Render admin menu view
         return view('admin.menu', compact('menuItems'));
     }
 
     /**
-     * Menu Item Add ya Update karne ke liye
+     * Create or update a menu dish item.
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation - zaroori fields check karna
+        // Step 1: Validate menu input fields
         $request->validate([
             'title'    => 'required|string',
             'category' => 'required|string',
@@ -41,10 +40,9 @@ class MenuController extends Controller
             'desc'     => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Dish ki image upload karna
+        // Step 2: Upload dish photo if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'menu_' . time() . '.' . $file->extension();
@@ -52,26 +50,25 @@ class MenuController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 3: Category ka naam set karna
+        // Step 3: Set formatted category name if missing
         if (empty($data['category_name'])) {
             $data['category_name'] = ucfirst($data['category']);
         }
 
-        // Step 4: Data save karna
+        // Step 4: Persist menu item via service
         $this->dataService->saveMenuItem($data);
 
-        // Step 5: Success message ke sath redirect karna
-        return back()->with('success', 'Menu item successfully save ho gaya!');
+        // Step 5: Redirect back with success status
+        return back()->with('success', 'Menu item saved successfully!');
     }
 
     /**
-     * Menu Item Delete karne ke liye
+     * Remove a menu item by ID.
      */
     public function destroy($id)
     {
-        // ID ke basis par item delete karna
         $this->dataService->deleteMenuItem((int) $id);
 
-        return back()->with('success', 'Menu item delete ho gaya!');
+        return back()->with('success', 'Menu item deleted successfully!');
     }
 }

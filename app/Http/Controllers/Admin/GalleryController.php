@@ -10,39 +10,37 @@ class GalleryController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Gallery Page - Saari photos dekhne ke liye
+     * Display all gallery showcases.
      */
     public function index()
     {
-        // Step 1: Saare gallery items lena
+        // Step 1: Retrieve all gallery items
         $galleryItems = $this->dataService->getGalleryItems();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render admin gallery view
         return view('admin.gallery', compact('galleryItems'));
     }
 
     /**
-     * Gallery Photo Add ya Update karne ke liye
+     * Create or update a gallery photo item.
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate gallery inputs
         $request->validate([
             'title' => 'required|string',
             'desc'  => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Photo upload karna
+        // Step 2: Upload gallery image if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'gallery_' . time() . '.' . $file->extension();
@@ -50,26 +48,25 @@ class GalleryController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Agar photo select nahi ki to default photo lagana
+        // Apply fallback default image if empty
         if (empty($data['image'])) {
             $data['image'] = 'img/portfolio/work1.jpg';
         }
 
-        // Step 3: Photo save karna
+        // Step 3: Save gallery item via service
         $this->dataService->saveGalleryItem($data);
 
-        // Step 4: Success message ke sath wapas bhej dena
-        return back()->with('success', 'Gallery item successfully save ho gaya!');
+        // Step 4: Redirect back with success status
+        return back()->with('success', 'Gallery item saved successfully!');
     }
 
     /**
-     * Gallery Item Delete karne ke liye
+     * Remove a gallery item by ID.
      */
     public function destroy($id)
     {
-        // ID ke basis par item delete karna
         $this->dataService->deleteGalleryItem((int) $id);
 
-        return back()->with('success', 'Gallery item delete ho gaya!');
+        return back()->with('success', 'Gallery item deleted successfully!');
     }
 }

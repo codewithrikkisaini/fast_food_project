@@ -10,30 +10,29 @@ class ReservationController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Table Booking Page open karna (Route: /reservation)
+     * Display table booking page (Route: /reservation).
      */
     public function index()
     {
-        // Step 1: Restaurant ki home settings lena
+        // Step 1: Retrieve restaurant settings
         $homeSettings = $this->dataService->getHomeSettings();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render reservation blade view
         return view('frontend.reservation', compact('homeSettings'));
     }
 
     /**
-     * Customer ki Table Booking Request Save karna (Route: POST /reservation)
+     * Process visitor table booking request (Route: POST /reservation).
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation - zaroori fields check karna
+        // Step 1: Validate table reservation fields
         $validated = $request->validate([
             'name'             => 'required|string',
             'phone'            => 'required|string',
@@ -44,10 +43,10 @@ class ReservationController extends Controller
             'special_requests' => 'nullable|string',
         ]);
 
-        // Step 2: Service ke zariye reservation save karna
+        // Step 2: Save reservation submission via service
         $this->dataService->addReservation($validated);
 
-        // Step 3: Success message ke sath redirect back karna
-        return back()->with('success', 'Aapka table reservation request successfully submit ho gaya hai! Hum jald hi confirm karenge.');
+        // Step 3: Redirect back with success status
+        return back()->with('success', 'Your table reservation request has been submitted successfully! We will confirm your booking shortly.');
     }
 }

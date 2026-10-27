@@ -10,46 +10,42 @@ class ReservationController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Table Bookings Page - Sabhi reservations dekhne ke liye
+     * Display all table reservations.
      */
     public function index()
     {
-        // Step 1: Saari reservations lena
+        // Step 1: Retrieve all reservation records
         $reservations = $this->dataService->getReservations();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render admin reservations view
         return view('admin.reservations', compact('reservations'));
     }
 
     /**
-     * Reservation Status Update karna (Confirmed ya Cancelled)
+     * Update status of a reservation (Confirmed or Cancelled).
      */
     public function updateStatus(Request $request, $id)
     {
-        // Request se status lena (default: Confirmed)
         $status = $request->input('status', 'Confirmed');
 
-        // Status update karna
         $this->dataService->updateReservationStatus((int) $id, $status);
 
-        return back()->with('success', "Reservation #{$id} ka status {$status} ho gaya!");
+        return back()->with('success', "Reservation #{$id} marked as {$status}!");
     }
 
     /**
-     * Reservation Delete karne ke liye
+     * Delete a reservation record by ID.
      */
     public function destroy($id)
     {
-        // ID ke basis par reservation record delete karna
         $this->dataService->deleteReservation((int) $id);
 
-        return back()->with('success', 'Reservation record delete ho gaya!');
+        return back()->with('success', 'Reservation record deleted successfully!');
     }
 }

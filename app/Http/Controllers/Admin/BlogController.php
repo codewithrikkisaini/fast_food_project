@@ -10,30 +10,29 @@ class BlogController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Blog Page - Sabhi blog posts dekhne ke liye
+     * Display all blog articles.
      */
     public function index()
     {
-        // Step 1: Saare blog posts lena
+        // Step 1: Retrieve all blog articles
         $blogs = $this->dataService->getBlogPosts();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render admin blog view
         return view('admin.blog', compact('blogs'));
     }
 
     /**
-     * Naya Blog Post Publish karna
+     * Publish a new blog article.
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate article inputs
         $request->validate([
             'title'    => 'required|string',
             'category' => 'required|string',
@@ -42,10 +41,9 @@ class BlogController extends Controller
             'content'  => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Blog image upload karna
+        // Step 2: Upload article thumbnail if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'blog_' . time() . '.' . $file->extension();
@@ -53,12 +51,12 @@ class BlogController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Default image agar user ne image na lagayi ho
+        // Apply default thumbnail if none selected
         if (empty($data['image'])) {
             $data['image'] = 'img/blog/1.jpg';
         }
 
-        // Current date set karna agar missing ho
+        // Set publishing timestamp if empty
         if (empty($data['day'])) {
             $data['day'] = date('d');
         }
@@ -66,18 +64,19 @@ class BlogController extends Controller
             $data['month'] = date('M');
         }
 
-        // Step 3: Blog post save karna
+        // Step 3: Save article via service
         $this->dataService->addBlogPost($data);
 
-        return back()->with('success', 'Naya blog article successfully publish ho gaya!');
+        // Step 4: Redirect back with success status
+        return back()->with('success', 'Blog article published successfully!');
     }
 
     /**
-     * Existing Blog Post Update karna
+     * Update an existing blog article.
      */
     public function update(Request $request, $id)
     {
-        // Step 1: Form validation
+        // Step 1: Validate updated article inputs
         $request->validate([
             'title'    => 'required|string',
             'category' => 'required|string',
@@ -88,7 +87,7 @@ class BlogController extends Controller
 
         $data = $request->except(['_token', 'image_file']);
 
-        // Step 2: Nayi image upload karna agar select ki gayi ho
+        // Step 2: Upload new thumbnail if provided
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $fileName = 'blog_' . time() . '.' . $file->extension();
@@ -96,20 +95,19 @@ class BlogController extends Controller
             $data['image'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 3: Blog post update karna
+        // Step 3: Update article record
         $this->dataService->updateBlogPost((int) $id, $data);
 
-        return back()->with('success', 'Blog article successfully update ho gaya!');
+        return back()->with('success', 'Blog article updated successfully!');
     }
 
     /**
-     * Blog Post Delete karna
+     * Delete an article by ID.
      */
     public function destroy($id)
     {
-        // ID ke basis par blog delete karna
         $this->dataService->deleteBlogPost((int) $id);
 
-        return back()->with('success', 'Blog article delete ho gaya!');
+        return back()->with('success', 'Blog article deleted successfully!');
     }
 }

@@ -9,23 +9,22 @@ class AboutController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Public About Us Page (Route: /about)
+     * Display public About Us page (Route: /about).
      */
     public function index()
     {
-        // Step 1: About page ke liye data lena (chefs, about text, reviews)
+        // Step 1: Retrieve chefs, about content, and customer reviews
         $chefs         = $this->dataService->getChefs();
         $aboutSettings = $this->dataService->getAboutSettings();
         $reviews       = $this->dataService->getReviews();
 
-        // Step 2: About blade view me data bhejna
+        // Step 2: Render about blade view with data
         return view('frontend.about', compact('chefs', 'aboutSettings', 'reviews'));
     }
 }

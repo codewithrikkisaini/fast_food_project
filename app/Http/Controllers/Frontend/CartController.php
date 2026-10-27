@@ -9,21 +9,20 @@ class CartController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Shopping Cart / Order Summary Page (Route: /cart)
+     * Display shopping cart and order summary (Route: /cart).
      */
     public function index()
     {
-        // Step 1: Saare menu items lena (cart suggestions ke liye)
+        // Step 1: Retrieve menu items for cart display & suggestions
         $menuItems = $this->dataService->getMenuItems();
 
-        // Step 2: Cart blade view me bhejna
+        // Step 2: Render cart blade view with data
         return view('frontend.cart', compact('menuItems'));
     }
 }

@@ -10,40 +10,38 @@ class AboutController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * About Us Settings Page open karna
+     * Display the About page management view.
      */
     public function index()
     {
-        // Step 1: Service se about page ka data lena
+        // Step 1: Retrieve about settings from data service
         $about = $this->dataService->getAboutSettings();
 
-        // Step 2: Blade view me data pass karna
+        // Step 2: Render admin about view with data
         return view('admin.about', compact('about'));
     }
 
     /**
-     * About Us Section ko update karna
+     * Update the About section content and images.
      */
     public function update(Request $request)
     {
-        // Step 1: Form Validation - zaroori fields check karna
+        // Step 1: Validate incoming request
         $request->validate([
             'tagline' => 'required|string',
             'title'   => 'required|string',
             'desc'    => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'image1_file', 'image2_file']);
 
-        // Step 2: Main image upload karna agar user ne choose ki hai
+        // Step 2: Upload primary about image if provided
         if ($request->hasFile('image1_file')) {
             $file = $request->file('image1_file');
             $fileName = 'about1_' . time() . '.' . $file->extension();
@@ -51,7 +49,7 @@ class AboutController extends Controller
             $data['image1'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 3: Second floating image upload karna
+        // Step 3: Upload secondary floating image if provided
         if ($request->hasFile('image2_file')) {
             $file = $request->file('image2_file');
             $fileName = 'about2_' . time() . '.' . $file->extension();
@@ -59,7 +57,7 @@ class AboutController extends Controller
             $data['image2'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 4: Quality points ko filter karna (sirf bhare hue points save honge)
+        // Step 4: Filter quality feature points
         if (!empty($request->points)) {
             $points = [];
             foreach ($request->points as $item) {
@@ -75,10 +73,10 @@ class AboutController extends Controller
             $data['points'] = $points;
         }
 
-        // Step 5: Data save karna
+        // Step 5: Save updated data via service
         $this->dataService->updateAboutSettings($data);
 
-        // Step 6: Success message ke sath wapas bhej dena
-        return back()->with('success', 'About page successfully update ho gaya!');
+        // Step 6: Redirect back with success status
+        return back()->with('success', 'About page content updated successfully!');
     }
 }

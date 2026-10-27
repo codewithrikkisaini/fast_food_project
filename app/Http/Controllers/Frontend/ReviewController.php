@@ -10,31 +10,30 @@ class ReviewController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Customer Testimonials & Reviews Page (Route: /reviews)
+     * Display customer reviews and testimonials page (Route: /reviews).
      */
     public function index()
     {
-        // Step 1: Reviews aur rating settings lena
+        // Step 1: Retrieve customer reviews and rating metrics
         $reviews        = $this->dataService->getReviews();
         $reviewSettings = $this->dataService->getReviewSettings();
 
-        // Step 2: Blade view me bhejna
+        // Step 2: Render reviews blade view with data
         return view('frontend.reviews', compact('reviews', 'reviewSettings'));
     }
 
     /**
-     * Customer ka Naya Review Save karna (Route: POST /reviews)
+     * Store visitor review submission (Route: POST /reviews).
      */
     public function store(Request $request)
     {
-        // Step 1: Form validation
+        // Step 1: Validate customer review fields
         $validated = $request->validate([
             'name'    => 'required|string',
             'role'    => 'nullable|string',
@@ -42,16 +41,16 @@ class ReviewController extends Controller
             'message' => 'required|string',
         ]);
 
-        // Step 2: Review format prepare karke save karna
+        // Step 2: Persist approved customer review
         $this->dataService->addReview([
             'name'   => $validated['name'],
-            'role'   => $validated['role'] ?? 'Happy Customer',
+            'role'   => $validated['role'] ?? 'Happy Diner',
             'rating' => (int) $validated['rating'],
             'text'   => $validated['message'],
             'status' => 'Approved'
         ]);
 
-        // Step 3: Success message ke sath redirect karna
-        return back()->with('success', 'Thank you! Aapka review successfully submit ho gaya hai.');
+        // Step 3: Redirect back with success status
+        return back()->with('success', 'Thank you for your feedback! Your review has been submitted successfully.');
     }
 }

@@ -10,40 +10,38 @@ class HomeController extends Controller
 {
     protected RestaurantDataService $dataService;
 
-    // Service inject karna
     public function __construct(RestaurantDataService $dataService)
     {
         $this->dataService = $dataService;
     }
 
     /**
-     * Home Section Settings Page open karna
+     * Display the Home section management view.
      */
     public function index()
     {
-        // Step 1: Existing home data lena
+        // Step 1: Retrieve existing home settings
         $home = $this->dataService->getHomeSettings();
 
-        // Step 2: Blade view me data bhejna
+        // Step 2: Render admin home view with data
         return view('admin.home', compact('home'));
     }
 
     /**
-     * Home Section (Hero Banner & Deal) ko update karna
+     * Update hero banner and deal section content.
      */
     public function update(Request $request)
     {
-        // Step 1: Form Validation - zaroori fields check karna
+        // Step 1: Validate required fields
         $request->validate([
             'hero_badge' => 'required|string',
             'hero_title' => 'required|string',
             'hero_desc'  => 'required|string',
         ]);
 
-        // Form ka sara data lena
         $data = $request->except(['_token', 'hero_image_file', 'deal_image_file']);
 
-        // Step 2: Hero image upload karna
+        // Step 2: Upload hero background image if provided
         if ($request->hasFile('hero_image_file')) {
             $file = $request->file('hero_image_file');
             $fileName = 'hero_' . time() . '.' . $file->extension();
@@ -51,7 +49,7 @@ class HomeController extends Controller
             $data['hero_image'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 3: Deal image upload karna
+        // Step 3: Upload promotional deal image if provided
         if ($request->hasFile('deal_image_file')) {
             $file = $request->file('deal_image_file');
             $fileName = 'deal_' . time() . '.' . $file->extension();
@@ -59,10 +57,10 @@ class HomeController extends Controller
             $data['deal_image'] = 'img/uploads/' . $fileName;
         }
 
-        // Step 4: Data save karna
+        // Step 4: Save updated settings via service
         $this->dataService->updateHomeSettings($data);
 
-        // Step 5: Success message ke sath wapas bhej dena
-        return back()->with('success', 'Home section content successfully update ho gaya!');
+        // Step 5: Redirect back with success status
+        return back()->with('success', 'Home section content updated successfully!');
     }
 }
