@@ -138,9 +138,32 @@ fast-food/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/
-│   │       ├── AdminController.php         # Foodie Admin dashboard & CRUD logic
-│   │       ├── Controller.php              # Base controller
-│   │       └── FrontendController.php     # Public visitor routes & form handlers
+│   │       ├── Admin/                          # Dedicated Admin Controllers (11 controllers)
+│   │       │   ├── AboutController.php
+│   │       │   ├── BlogController.php
+│   │       │   ├── ChefController.php
+│   │       │   ├── ContactController.php
+│   │       │   ├── DashboardController.php
+│   │       │   ├── GalleryController.php
+│   │       │   ├── HomeController.php
+│   │       │   ├── MenuController.php
+│   │       │   ├── ReservationController.php
+│   │       │   ├── ReviewController.php
+│   │       │   └── SettingController.php
+│   │       ├── Frontend/                       # Dedicated Frontend Controllers (10 controllers)
+│   │       │   ├── AboutController.php
+│   │       │   ├── BlogController.php
+│   │       │   ├── CartController.php
+│   │       │   ├── ChefController.php
+│   │       │   ├── ContactController.php
+│   │       │   ├── GalleryController.php
+│   │       │   ├── HomeController.php
+│   │       │   ├── MenuController.php
+│   │       │   ├── ReservationController.php
+│   │       │   └── ReviewController.php
+│   │       ├── Controller.php                  # Base controller
+│   │       ├── AdminController.php             # Refactored (routes to Admin/*)
+│   │       └── FrontendController.php          # Refactored (routes to Frontend/*)
 │   └── Services/
 │       └── RestaurantDataService.php       # Centralized business logic & data operations
 ├── config/                                 # Laravel configurations
@@ -241,47 +264,57 @@ Now open your favorite browser and visit:
 ### Frontend Routes
 | Method | Endpoint | Controller Action | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/` | `FrontendController@home` | Restaurant Home page |
-| `GET` | `/about` | `FrontendController@about` | Our Story & Highlights |
-| `GET` | `/menu` | `FrontendController@menu` | Food Menu & Categories |
-| `GET` | `/chefs` | `FrontendController@chefs` | Master Chefs Team |
-| `GET` | `/gallery` | `FrontendController@gallery` | Food & Atmosphere Gallery |
-| `GET` | `/reservation` | `FrontendController@reservation` | Table Booking View |
-| `POST` | `/reservation` | `FrontendController@storeReservation` | Process Table Booking |
-| `GET` | `/reviews` | `FrontendController@reviews` | Customer Testimonials |
-| `POST` | `/reviews` | `FrontendController@storeReview` | Submit Customer Review |
-| `GET` | `/blog` | `FrontendController@blog` | Articles & Recipes |
-| `GET` | `/blog/{id}` | `FrontendController@blogDetail` | Single Article View |
-| `GET` | `/contact` | `FrontendController@contact` | Contact Page |
-| `POST` | `/contact` | `FrontendController@storeContact` | Submit Visitor Message |
-| `GET` | `/cart` | `FrontendController@cart` | Cart & Checkout Summary |
+| `GET` | `/` | `Frontend\HomeController@index` | Restaurant Home page |
+| `GET` | `/about` | `Frontend\AboutController@index` | Our Story & Highlights |
+| `GET` | `/menu` | `Frontend\MenuController@index` | Food Menu & Categories |
+| `GET` | `/chefs` | `Frontend\ChefController@index` | Master Chefs Team |
+| `GET` | `/gallery` | `Frontend\GalleryController@index` | Food & Atmosphere Gallery |
+| `GET` | `/reservation` | `Frontend\ReservationController@index` | Table Booking View |
+| `POST` | `/reservation` | `Frontend\ReservationController@store` | Process Table Booking |
+| `GET` | `/reviews` | `Frontend\ReviewController@index` | Customer Testimonials |
+| `POST` | `/reviews` | `Frontend\ReviewController@store` | Submit Customer Review |
+| `GET` | `/blog` | `Frontend\BlogController@index` | Articles & Recipes |
+| `GET` | `/blog/{id}` | `Frontend\BlogController@show` | Single Article View |
+| `GET` | `/contact` | `Frontend\ContactController@index` | Contact Page |
+| `POST` | `/contact` | `Frontend\ContactController@store` | Submit Visitor Message |
+| `GET` | `/cart` | `Frontend\CartController@index` | Cart & Checkout Summary |
 
 ### Admin Routes (`/admin/*`)
 | Method | Endpoint | Controller Action | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/admin/dashboard` | `AdminController@dashboard` | Admin Metrics & Overview |
-| `GET` | `/admin/home` | `AdminController@home` | Hero Section & Deal Editor |
-| `POST` | `/admin/home` | `AdminController@updateHome` | Save Home settings & uploads |
-| `GET` | `/admin/about` | `AdminController@about` | About page content manager |
-| `POST` | `/admin/about` | `AdminController@updateAbout` | Save About content |
-| `GET` | `/admin/menu` | `AdminController@menu` | Menu Items Management |
-| `POST` | `/admin/menu/store` | `AdminController@storeMenuItem` | Create / Edit Menu Dish |
-| `POST` | `/admin/menu/delete/{id}` | `AdminController@deleteMenuItem` | Delete Menu Dish |
-| `GET` | `/admin/chefs` | `AdminController@chefs` | Chefs Management |
-| `POST` | `/admin/chefs/store` | `AdminController@storeChef` | Add / Update Chef |
-| `POST` | `/admin/chefs/delete/{id}` | `AdminController@deleteChef` | Delete Chef Profile |
-| `GET` | `/admin/gallery` | `AdminController@gallery` | Gallery Management |
-| `POST` | `/admin/gallery/store` | `AdminController@storeGalleryItem` | Add Gallery Item |
-| `POST` | `/admin/gallery/delete/{id}` | `AdminController@deleteGalleryItem` | Delete Gallery Item |
-| `GET` | `/admin/reservations` | `AdminController@reservations` | Table Bookings List |
-| `POST` | `/admin/reservations/status/{id}` | `AdminController@updateReservationStatus` | Update Status (Confirmed / Cancelled) |
-| `POST` | `/admin/reservations/delete/{id}` | `AdminController@deleteReservation` | Delete Reservation |
-| `GET` | `/admin/reviews` | `AdminController@reviews` | Review Moderation List |
-| `POST` | `/admin/reviews/status/{id}` | `AdminController@updateReviewStatus` | Approve / Unapprove Review |
-| `POST` | `/admin/reviews/delete/{id}` | `AdminController@deleteReview` | Delete Review |
-| `GET` | `/admin/contact` | `AdminController@contact` | Customer Inquiry Messages |
-| `POST` | `/admin/contact/read/{id}` | `AdminController@markContactRead` | Mark message as read |
-| `POST` | `/admin/contact/delete/{id}` | `AdminController@deleteContact` | Delete Inquiry |
+| `GET` | `/admin/dashboard` | `DashboardController@index` | Admin Metrics & Overview |
+| `GET` | `/admin/home` | `HomeController@index` | Hero Section & Deal Editor |
+| `POST` | `/admin/home` | `HomeController@update` | Save Home settings & uploads |
+| `GET` | `/admin/about` | `AboutController@index` | About page content manager |
+| `POST` | `/admin/about` | `AboutController@update` | Save About content |
+| `GET` | `/admin/menu` | `MenuController@index` | Menu Items Management |
+| `POST` | `/admin/menu/store` | `MenuController@store` | Create / Edit Menu Dish |
+| `POST` | `/admin/menu/delete/{id}` | `MenuController@destroy` | Delete Menu Dish |
+| `GET` | `/admin/chefs` | `ChefController@index` | Chefs Management |
+| `POST` | `/admin/chefs/store` | `ChefController@store` | Add / Update Chef |
+| `POST` | `/admin/chefs/delete/{id}` | `ChefController@destroy` | Delete Chef Profile |
+| `GET` | `/admin/gallery` | `GalleryController@index` | Gallery Management |
+| `POST` | `/admin/gallery/store` | `GalleryController@store` | Add Gallery Item |
+| `POST` | `/admin/gallery/delete/{id}` | `GalleryController@destroy` | Delete Gallery Item |
+| `GET` | `/admin/reservations` | `ReservationController@index` | Table Bookings List |
+| `POST` | `/admin/reservations/status/{id}` | `ReservationController@updateStatus` | Update Status (Confirmed / Cancelled) |
+| `POST` | `/admin/reservations/delete/{id}` | `ReservationController@destroy` | Delete Reservation |
+| `GET` | `/admin/reviews` | `ReviewController@index` | Review Moderation List |
+| `POST` | `/admin/reviews/settings` | `ReviewController@updateSettings` | Update Review Metrics |
+| `POST` | `/admin/reviews/store` | `ReviewController@store` | Add Review Record |
+| `POST` | `/admin/reviews/update/{id}` | `ReviewController@update` | Edit Review Record |
+| `POST` | `/admin/reviews/status/{id}` | `ReviewController@updateStatus` | Approve / Unapprove Review |
+| `POST` | `/admin/reviews/delete/{id}` | `ReviewController@destroy` | Delete Review |
+| `POST` | `/admin/reviews/delete-all` | `ReviewController@destroyAll` | Delete All Reviews |
+| `GET` | `/admin/blog` | `BlogController@index` | Blog Articles Management |
+| `POST` | `/admin/blog/store` | `BlogController@store` | Create New Blog Article |
+| `POST` | `/admin/blog/update/{id}` | `BlogController@update` | Update Existing Blog Article |
+| `POST` | `/admin/blog/delete/{id}` | `BlogController@destroy` | Delete Blog Article |
+| `GET` | `/admin/contact` | `ContactController@index` | Customer Inquiry Messages |
+| `POST` | `/admin/contact/read/{id}` | `ContactController@markRead` | Mark message as read |
+| `POST` | `/admin/contact/delete/{id}` | `ContactController@destroy` | Delete Inquiry |
+| `GET` | `/admin/settings` | `SettingController@index` | Global Restaurant Settings |
+| `POST` | `/admin/settings` | `SettingController@update` | Update Contact Info, Hours, Socials |
 
 ---
 
